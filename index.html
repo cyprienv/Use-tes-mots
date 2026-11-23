@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E0E12">
+<title>Use tes mots</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0E0E12; --bg2:#18181F; --ligne:#2A2A33; --ink:#F4F1EA; --gris:#8E8C99;
+  --jaune:#FFD23F; --rouge:#FF4B3E; --bleu:#3EC1FF;
+  --display:'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --texte:'Inter', system-ui, -apple-system, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--texte);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,textarea,select{font:inherit;color:inherit}
+#app{min-height:100%}
+
+/* ---------- commun ---------- */
+.logo{font-family:var(--display);font-weight:400;letter-spacing:.02em;line-height:.9;font-size:clamp(64px,13vw,190px)}
+.logo span{color:var(--jaune)}
+.logo.petit{font-size:clamp(34px,5vw,56px)}
+.btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:var(--jaune);color:#111;
+  font-weight:800;border-radius:14px;padding:14px 22px;font-size:18px;transition:transform .12s, opacity .2s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.btn.gros{font-size:24px;padding:22px 34px;min-width:280px}
+.btn small{font-weight:600;font-size:14px;opacity:.7}
+.btn.discret{background:var(--bg2);color:var(--ink);font-weight:600;font-size:15px;padding:10px 16px}
+.erreur{color:var(--rouge);font-weight:600}
+.pastille{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:999px;background:var(--bg2);font-weight:600;transition:opacity .3s, transform .3s}
+.pastille i{width:22px;height:22px;border-radius:50%;flex:none}
+.pastille.off{opacity:.3}
+.pastille.attente{opacity:.45}
+.pastille.fait{background:var(--ink);color:#111;transform:translateY(-3px)}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@keyframes monte{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* ---------- accueil ---------- */
+.accueil{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px 20px;text-align:center}
+.accueil .tag{font-size:clamp(17px,2vw,22px);color:var(--gris)}
+.accueil .choix{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+
+/* ---------- hôte : lobby ---------- */
+.lobby{min-height:100vh;padding:3vw 4vw;display:flex;flex-direction:column;gap:2.5vw}
+.lobby header{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.etat-reseau{font-size:15px;color:var(--gris)}
+.etat-reseau.ok::before{content:'●';color:#7CE38B;margin-right:6px}
+.lobby-grid{display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:2.5vw;flex:1}
+.bloc{background:var(--bg2);border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.bloc h2{font-family:var(--display);font-weight:400;font-size:30px;letter-spacing:.02em}
+.rejoindre{align-items:center;text-align:center;justify-content:center}
+.rejoindre .url{font-weight:800;font-size:clamp(16px,1.4vw,22px);word-break:break-all;color:var(--bleu)}
+.rejoindre .code{font-family:var(--display);font-size:clamp(80px,10vw,150px);line-height:1;letter-spacing:.08em;color:var(--jaune)}
+#qr{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--gris);font-size:14px;font-weight:600}
+#qr svg,#qr img{width:clamp(170px,15vw,240px);height:clamp(170px,15vw,240px);background:#fff;border-radius:14px;padding:8px;display:block}
+.liste-j{display:flex;flex-direction:column;gap:10px}
+.liste-j .pastille{font-size:20px;align-self:flex-start}
+.liste-j .pastille.nouveau{animation:pop .3s}
+.liste-j .vide{color:var(--gris)}
+.reglage{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600}
+.reglage select{background:var(--bg);border:1px solid var(--ligne);border-radius:10px;padding:8px 10px}
+.depot{border:2px dashed var(--ligne);border-radius:16px;padding:18px;text-align:center;color:var(--gris);transition:border-color .2s, background .2s}
+.depot.survol{border-color:var(--jaune);background:rgba(255,210,63,.06);color:var(--ink)}
+.depot label{color:var(--jaune);text-decoration:underline;cursor:pointer}
+.compteurs{display:flex;gap:10px;flex-wrap:wrap}
+.compteurs span{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:14px}
+.compteurs b{color:var(--jaune)}
+.avert{font-size:14px;color:var(--rouge)}
+
+/* ---------- hôte : partie ---------- */
+.jeu{min-height:100vh;padding:2.2vw 3.5vw;display:flex;flex-direction:column;gap:1.6vw}
+.haut{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.manche{font-family:var(--display);font-size:clamp(22px,2.2vw,34px);letter-spacing:.03em;color:var(--gris)}
+.manche b{color:var(--ink);font-weight:400}
+.chrono{font-family:var(--display);font-size:clamp(40px,4.5vw,72px);line-height:1;color:var(--jaune);min-width:2ch;text-align:right}
+.chrono.urgent{color:var(--rouge);animation:pop .4s}
+.consigne{font-weight:800;font-size:clamp(24px,2.6vw,42px);text-align:center}
+.scene-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.pastilles{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;min-height:46px}
+.pastilles .pastille{font-size:clamp(15px,1.3vw,20px)}
+
+/* scène : vidéo */
+.ecran-video{position:relative;width:min(100%, calc((100vh - 300px) * 16 / 9));aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden}
+.ecran-video video{width:100%;height:100%;object-fit:contain;display:block}
+.soustitre{position:absolute;left:6%;right:6%;bottom:7%;text-align:center;font-weight:800;font-size:clamp(22px,2.8vw,48px);line-height:1.2;
+  color:#fff;text-shadow:0 0 6px #000,0 2px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 -2px 0 #000}
+.soustitre span{background:rgba(0,0,0,.35);padding:.05em .3em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+
+/* scène : journal */
+.journal{background:#F3EEE3;color:#141414;width:min(100%, 980px);max-height:calc(100vh - 260px);padding:22px 30px 26px;border-radius:4px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px;transform:rotate(-.6deg)}
+.journal .mast{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:4px double #141414;padding-bottom:8px}
+.journal .mast span{font-family:'Playfair Display',Georgia,serif;font-weight:900;font-size:clamp(22px,2.4vw,40px);letter-spacing:.01em}
+.journal .mast small{font-size:13px;text-transform:uppercase;letter-spacing:.12em}
+.journal .titre{font-family:var(--display);font-weight:400;text-transform:uppercase;font-size:clamp(30px,4vw,68px);line-height:1;letter-spacing:.01em}
+.journal .mystere{color:#B8B0A0}
+.journal img{width:100%;min-height:0;object-fit:cover;border:1px solid #141414;max-height:calc(100vh - 480px)}
+
+/* scène : phrase à trous */
+.carte-trou{background:var(--ink);color:#111;border-radius:26px;padding:clamp(28px,4vw,64px);max-width:1200px;
+  font-weight:800;font-size:clamp(30px,3.8vw,64px);line-height:1.2;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.carte-trou .trou{display:inline-block;min-width:4ch;border-bottom:.08em solid #111;color:transparent}
+.carte-trou .rempli{background:var(--jaune);padding:0 .2em;border-radius:.15em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+
+/* vote */
+.vote-grid{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:3vw;align-items:center}
+.vote-grid .ecran-video{width:100%}
+.vote-grid .journal{max-height:none}
+.vote-grid .journal img{max-height:34vh}
+.vote-grid .carte-trou{font-size:clamp(22px,2.4vw,40px)}
+.liste-choix{list-style:none;display:flex;flex-direction:column;gap:12px}
+.liste-choix li{display:flex;gap:16px;align-items:center;background:var(--bg2);border-radius:16px;padding:16px 20px;font-weight:700;
+  font-size:clamp(18px,1.8vw,30px);animation:monte .4s both}
+.liste-choix li b{font-family:var(--display);font-weight:400;color:var(--jaune);font-size:1.3em;min-width:1.2em}
+
+/* révélation */
+.verdict{display:flex;justify-content:center;align-items:center;gap:28px;flex-wrap:wrap;min-height:60px}
+.verdict .votants{display:flex;gap:10px;flex-wrap:wrap;animation:monte .4s 1.2s both}
+.verdict .auteur{font-size:clamp(20px,2vw,32px);font-weight:600;animation:pop .4s 2.2s both}
+.verdict .auteur strong{font-weight:800}
+.verdict .pts{font-family:var(--display);color:var(--jaune);margin-left:10px;font-size:1.3em}
+.verdict .zero{color:var(--gris);font-weight:600;font-size:clamp(18px,1.6vw,26px)}
+.suivant{position:fixed;right:24px;bottom:22px}
+
+/* intro de manche */
+.intro{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+.intro .num{font-family:var(--display);color:var(--gris);font-size:clamp(26px,3vw,44px);animation:monte .4s both}
+.intro h1{font-family:var(--display);font-weight:400;font-size:clamp(70px,12vw,200px);line-height:.95;color:var(--jaune);animation:pop .5s .2s both}
+.intro p{font-size:clamp(20px,2vw,30px);font-weight:600;animation:monte .5s .5s both}
+
+/* scores */
+.scores{min-height:100vh;padding:4vw 8vw;display:flex;flex-direction:column;gap:2vw;justify-content:center}
+.scores h1{font-family:var(--display);font-weight:400;font-size:clamp(44px,5vw,80px)}
+.ligne-score{display:grid;grid-template-columns:2.2em minmax(140px,16vw) 1fr auto;gap:18px;align-items:center;font-size:clamp(20px,2vw,32px);font-weight:800;animation:monte .4s both}
+.ligne-score .rang{font-family:var(--display);font-weight:400;color:var(--gris)}
+.ligne-score .barre{height:28px;border-radius:8px;background:var(--bg2);overflow:hidden}
+.ligne-score .barre i{display:block;height:100%;border-radius:8px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.ligne-score .delta{color:var(--jaune);font-size:.8em;margin-left:8px}
+
+/* final */
+.final{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4vw;text-align:center;padding:30px}
+.final .gagnant{font-family:var(--display);font-weight:400;font-size:clamp(60px,9vw,150px);line-height:.95;animation:pop .6s both}
+.final .sous{font-size:clamp(20px,2vw,30px);color:var(--gris);font-weight:600}
+.podium{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.podium .pastille{font-size:clamp(16px,1.5vw,22px)}
+.final .actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+/* ---------- téléphone ---------- */
+.tel{min-height:100vh;min-height:100dvh;padding:28px 20px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:22px;max-width:520px;margin:0 auto}
+.tel form{display:flex;flex-direction:column;gap:16px}
+.tel label{display:flex;flex-direction:column;gap:8px;font-weight:600;color:var(--gris)}
+.tel input,.tel textarea{background:var(--bg2);border:2px solid var(--ligne);border-radius:14px;padding:16px;font-size:22px;color:var(--ink);outline:none}
+.tel input:focus,.tel textarea:focus{border-color:var(--jaune)}
+.tel #iCode{font-family:var(--display);font-size:40px;letter-spacing:.2em;text-transform:uppercase;text-align:center}
+.tel .btn{width:100%;font-size:22px;padding:18px}
+.tel .entete{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gris);font-weight:600}
+.tel .entete .moi{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.tel .entete .moi i{width:16px;height:16px;border-radius:50%}
+.tel .chronoJ{font-family:var(--display);color:var(--jaune);font-size:28px}
+.tel .grand{font-family:var(--display);font-weight:400;font-size:44px;line-height:1}
+.tel .consigneJ{font-weight:800;font-size:24px;line-height:1.25}
+.tel .phraseJ{background:var(--ink);color:#111;border-radius:16px;padding:18px;font-weight:700;font-size:20px;line-height:1.35}
+.tel .phraseJ .trou{display:inline-block;min-width:3ch;border-bottom:3px solid #111}
+.tel .compteur{text-align:right;color:var(--gris);font-size:14px;margin-top:-10px}
+.tel .centre{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px}
+.tel .rond{width:110px;height:110px;border-radius:50%;animation:pop .4s}
+.tel .info{color:var(--gris);font-size:18px}
+.tel .envoye{background:var(--bg2);border-radius:14px;padding:16px;font-weight:700;font-size:20px}
+.choixJ{display:flex;flex-direction:column;gap:12px}
+.choixJ button{background:var(--bg2);border:2px solid var(--ligne);border-radius:14px;padding:18px;text-align:left;font-weight:700;font-size:20px;line-height:1.3}
+.choixJ button:active{border-color:var(--jaune);background:#22222b}
+.choixJ button:disabled{opacity:.35}
+.choixJ button small{display:block;color:var(--gris);font-size:13px;font-weight:600;margin-top:4px}
+
+@media (max-width:1000px){
+  .lobby-grid{grid-template-columns:1fr}
+  .vote-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://unpkg.com/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="contenu.js"></script>
+<script>
+"use strict";
+// =====================================================================
+//  USE TES MOTS : jeu de répliques façon « Use Your Words »
+//  Un écran « hôte » (télé / ordi) + jusqu'à 6 téléphones « joueurs ».
+//  Les téléphones se connectent à l'hôte en pair-à-pair (WebRTC / PeerJS),
+//  donc pas besoin de serveur : un hébergement statique suffit.
+// =====================================================================
+
+const app = document.getElementById('app');
+const PREFIXE = 'punchline-cv-';          // préfixe des identifiants réseau
+const MAX_JOUEURS = 6;
+const LONGUEUR_MAX = 90;                  // caractères max par réponse
+const POINTS_VOTE = 100;
+const COULEURS = ['#FF4B3E','#FFD23F','#3EC1FF','#7CE38B','#C77DFF','#FF8FB1'];
+const MODES = {
+  video: { nom:'Sous-titres',    consigne:'Écrivez le sous-titre de cette scène 🎬', aide:'Inventez la réplique de la scène.' },
+  photo: { nom:'La Une',         consigne:'Trouvez le gros titre de cette une 📰',   aide:'Inventez le titre du journal pour cette photo.' },
+  trou:  { nom:'Phrase à trous', consigne:'Complétez la phrase ✍️',                  aide:'Remplissez le trou avec le plus drôle possible.' },
+};
+const C = Object.assign({ videos:[], photos:[], phrases:[] }, window.CONTENU || {});
+const params = new URLSearchParams(location.search);
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const melange = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const auHasard = a => a[Math.random() * a.length | 0];
+const TROU = /_{2,}/;
+const reseauDispo = () => typeof Peer !== 'undefined';
+
+// ---------------------------------------------------------------------
+//  Accueil
+// ---------------------------------------------------------------------
+function accueil() {
+  app.innerHTML = `
+  <div class="accueil">
+    <h1 class="logo">USE TES <span>MOTS</span></h1>
+    <p class="tag">Le jeu où la réplique la plus drôle l'emporte. De 2 à 6 joueurs.</p>
+    <div class="choix">
+      <button class="btn gros" id="bHote">Créer une partie<small>sur le grand écran</small></button>
+      <button class="btn gros alt" id="bJoin">Rejoindre<small>depuis ton téléphone</small></button>
+    </div>
+  </div>`;
+  document.getElementById('bHote').onclick = hote;
+  document.getElementById('bJoin').onclick = () => joueur('');
+}
+
+// =====================================================================
+//  HÔTE (grand écran)
+// =====================================================================
+function hote() {
+  const H = window.H = {
+    code: null, peer: null, enLigne: false, erreur: null,
+    joueurs: [],           // {id, nom, couleur, score, conn, connecte, token, bot}
+    phase: 'lobby',        // lobby | intro | ecrire | voter | rien | reveal | scores | final
+    etape: 0,              // incrémenté à chaque changement, pour annuler les minuteries périmées
+    manches: [], idx: -1,
+    reponses: {}, votes: {}, choix: [], ordre: [], revealIdx: 0, deltas: {},
+    fin: 0,
+    reglages: { manches: 6, tEcrire: 75, tVoter: 30 },
+    medias: [],            // fichiers glissés : {type:'photo'|'video', url, nom}
+  };
+
+  // ----- réseau -----
+  function ouvrir() {
+    H.code = Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random() * 24 | 0]).join('');
+    if (!reseauDispo()) { H.erreur = 'module'; render(); return; }
+    const peer = new Peer(PREFIXE + H.code.toLowerCase(), { debug: 1 });
+    H.peer = peer;
+    peer.on('open', () => { H.enLigne = true; H.erreur = null; if (H.phase === 'lobby') render(); });
+    peer.on('error', e => {
+      if (e.type === 'unavailable-id') { peer.destroy(); ouvrir(); return; }
+      console.warn('PeerJS', e.type, e);
+      if (['network', 'server-error', 'socket-error', 'browser-incompatible'].includes(e.type)) { H.erreur = e.type; if (H.phase === 'lobby') render(); }
+    });
+    peer.on('disconnected', () => { H.enLigne = false; setTimeout(() => { try { peer.reconnect(); } catch (_) {} }, 1000); });
+    peer.on('connection', conn => {
+      conn.on('data', d => recevoir(conn, d));
+      conn.on('close', () => {
+        const j = H.joueurs.find(x => x.conn === conn);
+        if (j) { j.connecte = false; live(); verifierFin(); }
+      });
+    });
+    if (H.phase === 'lobby') render();
+  }
+
+  function recevoir(conn, d) {
+    if (!d || typeof d !== 'object') return;
+    if (d.t === 'join') {
+      const nom = String(d.nom || '').trim().replace(/\s+/g, ' ').slice(0, 14);
+      if (!nom) return conn.send({ t: 'refus', msg: 'Choisis un pseudo.' });
+      let j = H.joueurs.find(x => x.nom.toLowerCase() === nom.toLowerCase());
+      if (j) {
+        const memeAppareil = d.token && d.token === j.token;
+        if (j.bot || (!memeAppareil && j.connecte)) return conn.send({ t: 'refus', msg: 'Ce pseudo est déjà pris.' });
+        if (j.conn && j.conn !== conn) { try { j.conn.close(); } catch (_) {} }
+        j.conn = conn; j.connecte = true; j.token = d.token;
+      } else {
+        if (H.joueurs.length >= MAX_JOUEURS) return conn.send({ t: 'refus', msg: 'La partie est complète (6 joueurs max).' });
+        j = { id: 'j' + Math.random().toString(36).slice(2, 9), nom, couleur: couleurLibre(), score: 0, conn, connecte: true, token: d.token };
+        H.joueurs.push(j);
+      }
+      conn.send({ t: 'ok', id: j.id, nom: j.nom, couleur: j.couleur });
+      envoyer(j); live();
+      return;
+    }
+    const j = H.joueurs.find(x => x.conn === conn);
+    if (!j) return;
+    if (d.t === 'rep') soumettre(j, d.texte);
+    if (d.t === 'vote') voter(j, d.i);
+  }
+
+  function couleurLibre() {
+    const prises = H.joueurs.map(j => j.couleur);
+    return COULEURS.find(c => !prises.includes(c)) || auHasard(COULEURS);
+  }
+
+  const restant = () => Math.max(0, Math.ceil((H.fin - Date.now()) / 1000));
+
+  function vue(j) {
+    const m = H.manches[H.idx];
+    const v = { t: 'etat', phase: H.phase, manche: H.idx + 1, total: H.manches.length, score: j.score, etape: H.etape };
+    if (H.phase === 'intro') v.mode = m.mode;
+    if (H.phase === 'ecrire') Object.assign(v, { mode: m.mode, texte: m.mode === 'trou' ? m.texte : null, envoye: H.reponses[j.id] || null, reste: restant() });
+    if (H.phase === 'voter') Object.assign(v, { choix: H.choix.map((c, i) => ({ i, texte: c.texte, moi: c.auteur === j.id })), vote: H.votes[j.id] ?? null, reste: restant() });
+    if (H.phase === 'final') { const cl = classement(); v.rang = cl.findIndex(x => x.id === j.id) + 1; v.nb = cl.length; }
+    return v;
+  }
+  function envoyer(j) {
+    if (j.bot || !j.conn || !j.connecte) return;
+    try { j.conn.send(vue(j)); } catch (e) { console.warn(e); }
+  }
+  const syncTous = () => H.joueurs.forEach(envoyer);
+  const classement = () => [...H.joueurs].sort((a, b) => b.score - a.score);
+  const actifs = () => H.joueurs.filter(j => j.connecte);
+
+  // ----- actions des joueurs -----
+  function soumettre(j, texte) {
+    if (H.phase !== 'ecrire' || H.reponses[j.id]) return;
+    texte = String(texte || '').trim().replace(/\s+/g, ' ').slice(0, LONGUEUR_MAX);
+    if (!texte) return;
+    H.reponses[j.id] = texte;
+    envoyer(j); live(); verifierFin();
+  }
+  function voter(j, i) {
+    if (H.phase !== 'voter' || H.votes[j.id] != null) return;
+    const c = H.choix[i];
+    if (!c || c.auteur === j.id) return;
+    H.votes[j.id] = i;
+    envoyer(j); live(); verifierFin();
+  }
+  const peutVoter = j => H.choix.some(c => c.auteur !== j.id);
+
+  function verifierFin() {
+    if (H.phase === 'ecrire') {
+      const a = actifs();
+      if (a.length && a.every(j => H.reponses[j.id])) passerVote();
+    } else if (H.phase === 'voter') {
+      const a = actifs().filter(peutVoter);
+      if (a.every(j => H.votes[j.id] != null)) passerReveal();
+    }
+  }
+
+  // ----- déroulé de la partie -----
+  function phase(p) { H.phase = p; H.etape++; render(); syncTous(); }
+  function plusTard(ms, fn) { const e = H.etape; setTimeout(() => { if (H.etape === e) fn(); }, ms); }
+
+  function construireManches() {
+    const pools = {
+      video: melange([...C.videos, ...H.medias.filter(m => m.type === 'video').map(m => m.url)]).map(src => ({ mode: 'video', src })),
+      photo: melange([...C.photos, ...H.medias.filter(m => m.type === 'photo').map(m => m.url)]).map(src => ({ mode: 'photo', src })),
+      trou:  melange(C.phrases).map(texte => ({ mode: 'trou', texte })),
+    };
+    const modes = melange(Object.keys(pools).filter(k => pools[k].length));
+    const out = [];
+    let k = 0;
+    while (out.length < H.reglages.manches && modes.some(m => pools[m].length)) {
+      const m = modes[k++ % modes.length];
+      if (pools[m].length) out.push(pools[m].shift());
+    }
+    return out;
+  }
+
+  function lancer() {
+    H.manches = construireManches();
+    if (!H.manches.length || H.joueurs.length < 2) return;
+    H.joueurs.forEach(j => j.score = 0);
+    H.idx = -1;
+    mancheSuivante();
+  }
+
+  function mancheSuivante() {
+    H.idx++;
+    if (H.idx >= H.manches.length) return phase('final');
+    phase('intro');
+    plusTard(3200, debutEcrire);
+  }
+
+  function debutEcrire() {
+    H.reponses = {}; H.votes = {}; H.choix = [];
+    H.fin = Date.now() + H.reglages.tEcrire * 1000;
+    phase('ecrire');
+    H.joueurs.filter(j => j.bot).forEach(b => plusTard(1500 + Math.random() * 6000, () => soumettre(b, auHasard(REPLIQUES_BOT))));
+  }
+
+  function passerVote() {
+    H.choix = melange(Object.entries(H.reponses).map(([auteur, texte]) => ({ auteur, texte })));
+    if (H.choix.length < 2) { phase('rien'); plusTard(3500, mancheSuivante); return; }
+    H.votes = {};
+    H.fin = Date.now() + H.reglages.tVoter * 1000;
+    phase('voter');
+    H.joueurs.filter(j => j.bot).forEach(b => plusTard(1500 + Math.random() * 5000, () => {
+      const possibles = H.choix.map((c, i) => i).filter(i => H.choix[i].auteur !== b.id);
+      if (possibles.length) voter(b, auHasard(possibles));
+    }));
+    verifierFin();
+  }
+
+  function passerReveal() {
+    H.deltas = {};
+    H.choix.forEach((c, i) => {
+      c.votants = Object.keys(H.votes).filter(id => H.votes[id] === i);
+      const pts = c.votants.length * POINTS_VOTE;
+      const auteur = H.joueurs.find(j => j.id === c.auteur);
+      if (auteur) auteur.score += pts;
+      H.deltas[c.auteur] = (H.deltas[c.auteur] || 0) + pts;
+    });
+    // du moins voté au plus voté, pour garder le suspense
+    H.ordre = [...H.choix].sort((a, b) => a.votants.length - b.votants.length);
+    H.revealIdx = 0;
+    phase('reveal');
+    programmerReveal();
+  }
+
+  function programmerReveal() {
+    const m = H.manches[H.idx];
+    const e = H.etape;
+    if (m.mode === 'video') {
+      const v = app.querySelector('video');
+      if (v) {
+        v.onended = () => plusTard(1800, avancerReveal);
+        v.onerror = () => plusTard(5500, avancerReveal);
+      }
+      plusTard(25000, avancerReveal); // sécurité si la vidéo est très longue
+    } else {
+      plusTard(6000, avancerReveal);
+    }
+  }
+
+  function avancerReveal() {
+    if (H.phase !== 'reveal') return;
+    H.revealIdx++;
+    if (H.revealIdx >= H.ordre.length) { phase('scores'); plusTard(7000, mancheSuivante); return; }
+    H.etape++; render(); programmerReveal();
+  }
+
+  function suivant() {
+    if (H.phase === 'reveal') avancerReveal();
+    else if (H.phase === 'scores') mancheSuivante();
+  }
+
+  function rejouer() {
+    H.joueurs = H.joueurs.filter(j => j.bot || j.connecte);
+    H.joueurs.forEach(j => j.score = 0);
+    H.idx = -1; H.manches = [];
+    phase('lobby');
+  }
+
+  // ----- minuterie -----
+  setInterval(() => {
+    if (H.phase !== 'ecrire' && H.phase !== 'voter') return;
+    const r = restant();
+    const el = document.getElementById('chrono');
+    if (el) { el.textContent = r; el.classList.toggle('urgent', r <= 10); }
+    if (r <= 0) H.phase === 'ecrire' ? passerVote() : passerReveal();
+  }, 250);
+
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea, select')) return;
+    if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'Enter') { e.preventDefault(); suivant(); }
+  });
+
+  // ----- médias glissés -----
+  function ajouterFichiers(files) {
+    [...files].forEach(f => {
+      const type = f.type.startsWith('video/') ? 'video' : f.type.startsWith('image/') ? 'photo' : null;
+      if (type) H.medias.push({ type, url: URL.createObjectURL(f), nom: f.name });
+    });
+    live();
+  }
+  document.addEventListener('dragover', e => { if (H.phase !== 'lobby') return; e.preventDefault(); document.getElementById('depot')?.classList.add('survol'); });
+  document.addEventListener('dragleave', e => { if (e.relatedTarget === null) document.getElementById('depot')?.classList.remove('survol'); });
+  document.addEventListener('drop', e => {
+    if (H.phase !== 'lobby') return;
+    e.preventDefault();
+    document.getElementById('depot')?.classList.remove('survol');
+    ajouterFichiers(e.dataTransfer.files);
+  });
+
+  // ----- rendu -----
+  const lienJoin = () => location.origin + location.pathname + '?code=' + H.code;
+  const pastille = (j, cls = '') => `<span class="pastille ${cls}"><i style="background:${j.couleur}"></i>${esc(j.nom)}</span>`;
+
+  function scene(m, texte, opts = {}) {
+    if (m.mode === 'video') {
+      return `<div class="ecran-video"><video src="${esc(m.src)}" muted autoplay playsinline ${opts.boucle ? 'loop' : ''}></video>
+        ${texte ? `<div class="soustitre"><span>${esc(texte)}</span></div>` : ''}</div>`;
+    }
+    if (m.mode === 'photo') {
+      const date = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      return `<div class="journal"><div class="mast"><span>Le Quotidien des Mots</span><small>${date} · Édition spéciale</small></div>
+        <h2 class="titre">${texte ? esc(texte) : '<span class="mystere">??? ??? ???</span>'}</h2>
+        <img src="${esc(m.src)}" alt=""></div>`;
+    }
+    const morceaux = TROU.test(m.texte) ? m.texte.split(TROU) : [m.texte + ' ', ''];
+    const trou = texte ? `<span class="rempli">${esc(texte)}</span>` : `<span class="trou">____</span>`;
+    return `<div class="carte-trou">${morceaux.map(esc).join(trou)}</div>`;
+  }
+
+  function entete(droite = '') {
+    const m = H.manches[H.idx];
+    return `<div class="haut"><span class="manche">Manche <b>${H.idx + 1}/${H.manches.length}</b> · ${MODES[m.mode].nom}</span>${droite}</div>`;
+  }
+
+  function render() {
+    const m = H.manches[H.idx];
+    const p = H.phase;
+
+    if (p === 'lobby') {
+      const fichierLocal = location.protocol === 'file:';
+      app.innerHTML = `
+      <div class="lobby">
+        <header><h1 class="logo petit">USE TES <span>MOTS</span></h1>
+          <span class="etat-reseau ${H.enLigne ? 'ok' : ''}">${
+            H.erreur === 'module' ? 'Module réseau introuvable : vérifie la connexion internet de cet écran.'
+            : H.erreur ? 'Problème réseau (' + esc(H.erreur) + '). Recharge la page.'
+            : H.enLigne ? 'Prêt à recevoir les joueurs' : 'Connexion…'}</span></header>
+        <div class="lobby-grid">
+          <section class="bloc rejoindre">
+            <p>Sur ton téléphone, ouvre</p>
+            <div class="url">${esc(lienJoin().replace(/^https?:\/\//, '').replace(/\?code=.*/, ''))}</div>
+            <p>puis entre le code</p>
+            <div class="code">${H.code}</div>
+            <div id="qr"></div>
+            ${fichierLocal ? `<p class="avert">Le jeu est ouvert en fichier local : les téléphones ne pourront pas l'ouvrir. Mets-le en ligne (Netlify, GitHub Pages) pour jouer à plusieurs.</p>` : ''}
+          </section>
+          <section class="bloc">
+            <h2>Joueurs <span id="nbJ"></span></h2>
+            <div class="liste-j" id="listeJ"></div>
+            <div style="margin-top:auto"><button class="btn discret" id="bBot">+ Ajouter un bot (pour tester)</button></div>
+          </section>
+          <section class="bloc">
+            <h2>Réglages</h2>
+            <div class="reglage">Nombre de manches
+              <select id="sManches">${[3,4,5,6,8,10,12].map(n => `<option ${n === H.reglages.manches ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+            <div class="reglage">Temps pour écrire
+              <select id="sEcrire">${[45,60,75,90,120].map(n => `<option value="${n}" ${n === H.reglages.tEcrire ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
+            <div class="reglage">Temps pour voter
+              <select id="sVoter">${[20,30,45].map(n => `<option value="${n}" ${n === H.reglages.tVoter ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
+            <div class="depot" id="depot">Glisse tes photos et vidéos ici<br>ou <label>choisis des fichiers<input type="file" id="iFichiers" accept="image/*,video/*" multiple hidden></label></div>
+            <div class="compteurs" id="compteurs"></div>
+            <button class="btn gros" id="bLancer" style="margin-top:auto">Lancer la partie</button>
+          </section>
+        </div>
+      </div>`;
+      const qrEl = document.getElementById('qr');
+      if (!fichierLocal) {
+        const legende = '<span>📱 Scanne pour rejoindre directement</span>';
+        try {
+          const qr = qrcode(0, 'M'); qr.addData(lienJoin()); qr.make();
+          qrEl.innerHTML = qr.createSvgTag(5, 0) + legende;
+        } catch (_) {
+          // secours si le module QR n'a pas pu se charger
+          qrEl.innerHTML = `<img alt="QR code" src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=0&data=${encodeURIComponent(lienJoin())}">` + legende;
+        }
+      }
+      document.getElementById('bBot').onclick = ajouterBot;
+      document.getElementById('bLancer').onclick = lancer;
+      document.getElementById('iFichiers').onchange = e => ajouterFichiers(e.target.files);
+      document.getElementById('sManches').onchange = e => H.reglages.manches = +e.target.value;
+      document.getElementById('sEcrire').onchange = e => H.reglages.tEcrire = +e.target.value;
+      document.getElementById('sVoter').onchange = e => H.reglages.tVoter = +e.target.value;
+    }
+
+    else if (p === 'intro') {
+      app.innerHTML = `<div class="intro"><div class="num">Manche ${H.idx + 1} sur ${H.manches.length}</div>
+        <h1>${MODES[m.mode].nom}</h1><p>${MODES[m.mode].aide}</p></div>`;
+    }
+
+    else if (p === 'ecrire') {
+      app.innerHTML = `<div class="jeu">${entete('<span class="chrono" id="chrono"></span>')}
+        <div class="consigne">${MODES[m.mode].consigne}</div>
+        <div class="scene-wrap">${scene(m, null, { boucle: true })}</div>
+        <div class="pastilles" id="pastilles"></div></div>`;
+    }
+
+    else if (p === 'rien') {
+      app.innerHTML = `<div class="intro"><h1>Silence radio</h1><p>Pas assez de réponses pour voter. On passe à la suite !</p></div>`;
+    }
+
+    else if (p === 'voter') {
+      app.innerHTML = `<div class="jeu">${entete('<span class="chrono" id="chrono"></span>')}
+        <div class="consigne">Votez pour la plus drôle sur vos téléphones</div>
+        <div class="vote-grid"><div>${scene(m, null, { boucle: true })}</div>
+          <ol class="liste-choix">${H.choix.map((c, i) => `<li style="animation-delay:${i * .12}s"><b>${i + 1}</b>${esc(c.texte)}</li>`).join('')}</ol></div>
+        <div class="pastilles" id="pastilles"></div></div>`;
+    }
+
+    else if (p === 'reveal') {
+      const c = H.ordre[H.revealIdx];
+      const auteur = H.joueurs.find(j => j.id === c.auteur) || { nom: '?', couleur: '#888' };
+      const votants = c.votants.map(id => H.joueurs.find(j => j.id === id)).filter(Boolean);
+      app.innerHTML = `<div class="jeu">${entete(`<span class="manche">${H.revealIdx + 1}/${H.ordre.length}</span>`)}
+        <div class="scene-wrap">${scene(m, c.texte)}</div>
+        <div class="verdict">
+          <div class="votants">${votants.length ? votants.map(j => pastille(j, 'fait')).join('') : '<span class="zero">Aucun vote 😬</span>'}</div>
+          <div class="auteur">écrit par <strong style="color:${auteur.couleur}">${esc(auteur.nom)}</strong><span class="pts">+${votants.length * POINTS_VOTE}</span></div>
+        </div>
+        <button class="btn discret suivant" id="bSuiv">Suivant ▸</button></div>`;
+      document.getElementById('bSuiv').onclick = suivant;
+    }
+
+    else if (p === 'scores') {
+      const cl = classement();
+      const max = Math.max(1, ...cl.map(j => j.score));
+      app.innerHTML = `<div class="scores"><h1>Classement</h1>
+        ${cl.map((j, i) => `<div class="ligne-score" style="animation-delay:${i * .1}s">
+          <span class="rang">${i + 1}</span><span style="color:${j.couleur}">${esc(j.nom)}</span>
+          <span class="barre"><i style="width:0;background:${j.couleur}" data-w="${(j.score / max) * 100}"></i></span>
+          <span>${j.score}${H.deltas[j.id] ? `<span class="delta">+${H.deltas[j.id]}</span>` : ''}</span></div>`).join('')}
+        <button class="btn discret suivant" id="bSuiv">Manche suivante ▸</button></div>`;
+      requestAnimationFrame(() => setTimeout(() => app.querySelectorAll('.barre i').forEach(i => i.style.width = i.dataset.w + '%'), 60));
+      document.getElementById('bSuiv').onclick = suivant;
+    }
+
+    else if (p === 'final') {
+      const cl = classement();
+      const top = cl.filter(j => j.score === cl[0].score);
+      app.innerHTML = `<div class="final">
+        <div class="sous">Et le roi des mots est…</div>
+        <div class="gagnant" style="color:${top[0].couleur}">${top.map(j => esc(j.nom)).join(' & ')}</div>
+        <div class="sous">${cl[0].score} points</div>
+        <div class="podium">${cl.map((j, i) => pastille({ ...j, nom: `${i + 1}. ${j.nom} · ${j.score}` }, i === 0 ? 'fait' : '')).join('')}</div>
+        <div class="actions"><button class="btn gros" id="bRejouer">Rejouer</button></div></div>`;
+      document.getElementById('bRejouer').onclick = rejouer;
+    }
+
+    live();
+  }
+
+  // mises à jour légères (sans tout redessiner, pour ne pas relancer les vidéos)
+  function live() {
+    if (H.phase === 'lobby') {
+      const liste = document.getElementById('listeJ');
+      if (!liste) return;
+      liste.innerHTML = H.joueurs.length
+        ? H.joueurs.map(j => { const n = !j.vu; j.vu = true; return pastille(j, (j.connecte ? '' : 'off') + (n ? ' nouveau' : '')); }).join('')
+        : '<p class="vide">En attente des joueurs…</p>';
+      document.getElementById('nbJ').textContent = `${H.joueurs.length}/${MAX_JOUEURS}`;
+      document.getElementById('bBot').disabled = H.joueurs.length >= MAX_JOUEURS;
+      const nV = C.videos.length + H.medias.filter(m => m.type === 'video').length;
+      const nP = C.photos.length + H.medias.filter(m => m.type === 'photo').length;
+      document.getElementById('compteurs').innerHTML =
+        `<span>🎬 Vidéos <b>${nV}</b></span><span>📰 Photos <b>${nP}</b></span><span>✍️ Phrases <b>${C.phrases.length}</b></span>`;
+      const b = document.getElementById('bLancer');
+      b.disabled = H.joueurs.length < 2 || nV + nP + C.phrases.length === 0;
+      b.innerHTML = H.joueurs.length < 2 ? 'Lancer la partie<small>il faut au moins 2 joueurs</small>' : 'Lancer la partie';
+    }
+    const zone = document.getElementById('pastilles');
+    if (zone) {
+      zone.innerHTML = H.joueurs.map(j => {
+        if (!j.connecte) return pastille(j, 'off');
+        if (H.phase === 'ecrire') return pastille(j, H.reponses[j.id] ? 'fait' : 'attente');
+        if (H.phase === 'voter') return pastille(j, !peutVoter(j) || H.votes[j.id] != null ? 'fait' : 'attente');
+        return pastille(j);
+      }).join('');
+    }
+  }
+
+  function ajouterBot() {
+    if (H.joueurs.length >= MAX_JOUEURS) return;
+    const pris = H.joueurs.map(j => j.nom);
+    const nom = NOMS_BOT.find(n => !pris.includes(n)) || 'Bot ' + (H.joueurs.length + 1);
+    H.joueurs.push({ id: 'b' + Math.random().toString(36).slice(2, 9), nom, couleur: couleurLibre(), score: 0, connecte: true, bot: true });
+    live();
+  }
+
+  ouvrir();
+  render();
+}
+
+const NOMS_BOT = ['Bot Gégé', 'Bot Ginette', 'Bot Kévin', 'Bot Josiane', 'Bot Raymond', 'Bot Lola'];
+const REPLIQUES_BOT = [
+  'Une raclette à 3h du matin', 'Mon ex', 'Le Wi-Fi de mamie', 'Un pigeon très motivé', 'Gérard de la compta',
+  'Trois ratons laveurs dans un manteau', 'Une chaussette orpheline', 'Le bruit du micro-ondes', 'Un câlin non sollicité',
+  'Une tartiflette géante', 'La TVA', 'Mon compte en banque', 'Un ninja en tongs', 'Le chargeur de quelqu\'un d\'autre',
+  'Des pâtes sans sel', 'Un DJ set de ma tante', 'La rumeur de la machine à café', 'Un abonnement à la salle jamais utilisé',
+  'Une IA un peu trop honnête', 'Un pain au chocolat (pas une chocolatine)', 'Une licorne en burn-out', 'Le chat du voisin',
+  'Des chaussettes avec des sandales', 'J\'ai oublié d\'éteindre le four', 'Un selfie avec un pigeon',
+];
+
+// =====================================================================
+//  JOUEUR (téléphone)
+// =====================================================================
+function joueur(codeInit) {
+  const P = {
+    peer: null, conn: null, moi: null, etat: null, cle: '', fin: 0,
+    code: (codeInit || '').toUpperCase(),
+    nom: localStorage.getItem('pl-nom') || '',
+    token: localStorage.getItem('pl-token') || (() => { const t = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('pl-token', t); return t; })(),
+  };
+
+  function formulaire(msg) {
+    P.moi = null; P.cle = '';
+    app.innerHTML = `<div class="tel">
+      <h1 class="logo petit">USE TES <span>MOTS</span></h1>
+      <form id="fJoin" autocomplete="off">
+        <label>Code de la partie<input id="iCode" maxlength="4" autocapitalize="characters" value="${esc(P.code)}" required></label>
+        <label>Ton pseudo<input id="iNom" maxlength="14" value="${esc(P.nom)}" required></label>
+        ${msg ? `<p class="erreur">${esc(msg)}</p>` : ''}
+        <button class="btn">C'est parti</button>
+      </form></div>`;
+    const f = document.getElementById('fJoin');
+    (P.code ? document.getElementById('iNom') : document.getElementById('iCode')).focus();
+    f.onsubmit = e => {
+      e.preventDefault();
+      P.code = document.getElementById('iCode').value.trim().toUpperCase();
+      P.nom = document.getElementById('iNom').value.trim();
+      if (!P.code || !P.nom) return;
+      localStorage.setItem('pl-nom', P.nom);
+      connecter();
+    };
+  }
+
+  function message(titre, texte, bouton) {
+    app.innerHTML = `<div class="tel"><div class="centre"><div class="grand">${titre}</div><p class="info">${texte || ''}</p>
+      ${bouton ? `<button class="btn" id="bMsg">${bouton}</button>` : ''}</div></div>`;
+    if (bouton) document.getElementById('bMsg').onclick = connecter;
+  }
+
+  function connecter() {
+    if (!reseauDispo()) return formulaire('Impossible de charger le module réseau. Vérifie ta connexion.');
+    message('Connexion…', 'On cherche la partie ' + esc(P.code));
+    if (P.peer) { try { P.peer.destroy(); } catch (_) {} }
+    let repondu = false;
+    const peer = P.peer = new Peer(undefined, { debug: 1 });
+    const delai = setTimeout(() => { if (!repondu) { formulaire('Partie introuvable. Vérifie le code.'); peer.destroy(); } }, 15000);
+    peer.on('open', () => {
+      const conn = P.conn = peer.connect(PREFIXE + P.code.toLowerCase(), { serialization: 'json', reliable: true });
+      conn.on('open', () => conn.send({ t: 'join', nom: P.nom, token: P.token }));
+      conn.on('data', d => {
+        if (d.t === 'ok') { repondu = true; clearTimeout(delai); P.moi = d; }
+        else if (d.t === 'refus') { repondu = true; clearTimeout(delai); formulaire(d.msg); peer.destroy(); }
+        else if (d.t === 'etat') { P.etat = d; render(); }
+      });
+      conn.on('close', () => { if (P.moi) { P.moi = null; message('Oups', 'La connexion avec l\'écran a été perdue.', 'Se reconnecter'); } });
+    });
+    peer.on('error', e => {
+      if (e.type === 'peer-unavailable') { repondu = true; clearTimeout(delai); formulaire('Partie introuvable. Vérifie le code.'); }
+      else if (!repondu) { clearTimeout(delai); formulaire('Problème de connexion (' + e.type + '). Réessaie.'); }
+    });
+  }
+
+  function envoyer(obj) { try { P.conn.send(obj); } catch (e) { console.warn(e); } }
+
+  function render() {
+    const s = P.etat, moi = P.moi;
+    if (!s || !moi) return;
+    // on ne redessine que si l'écran change vraiment (pour ne pas effacer ce qu'on tape)
+    const cle = [s.phase, s.etape, s.envoye ? 1 : 0, s.vote ?? '-'].join('|');
+    if (cle === P.cle) return;
+    P.cle = cle;
+    if (s.reste != null) P.fin = Date.now() + s.reste * 1000;
+
+    const entete = `<div class="entete"><span class="moi"><i style="background:${moi.couleur}"></i>${esc(moi.nom)}</span>
+      ${s.phase === 'ecrire' || s.phase === 'voter' ? '<span class="chronoJ" id="chronoJ"></span>' : `<span>${s.score} pts</span>`}</div>`;
+    let corps = '';
+
+    if (s.phase === 'lobby') {
+      corps = `<div class="centre"><div class="rond" style="background:${moi.couleur}"></div><div class="grand">T'es dedans !</div>
+        <p class="info">Regarde ton nom sur l'écran. La partie commence dès que l'hôte la lance.</p></div>`;
+    }
+    else if (s.phase === 'intro') {
+      corps = `<div class="centre"><p class="info">Manche ${s.manche}/${s.total}</p><div class="grand">${MODES[s.mode].nom}</div><p class="info">Prépare-toi…</p></div>`;
+    }
+    else if (s.phase === 'ecrire' && s.envoye) {
+      corps = `<div class="centre"><div class="grand">Envoyé ✓</div><div class="envoye">${esc(s.envoye)}</div><p class="info">On attend les autres…</p></div>`;
+    }
+    else if (s.phase === 'ecrire') {
+      const morceaux = s.texte ? (TROU.test(s.texte) ? s.texte.split(TROU) : [s.texte + ' ', '']) : null;
+      corps = `<div class="consigneJ">${MODES[s.mode].consigne}</div>
+        ${morceaux ? `<div class="phraseJ">${morceaux.map(esc).join('<span class="trou">&nbsp;</span>')}</div>` : '<p class="info">Regarde l\'écran 👀</p>'}
+        <form id="fRep" style="display:flex;flex-direction:column;gap:16px">
+          <textarea id="tRep" rows="3" maxlength="${LONGUEUR_MAX}" placeholder="Ta réponse…" enterkeyhint="send"></textarea>
+          <div class="compteur" id="cpt">0/${LONGUEUR_MAX}</div>
+          <button class="btn">Envoyer</button></form>`;
+    }
+    else if (s.phase === 'voter') {
+      const votables = s.choix.filter(c => !c.moi);
+      if (!votables.length) corps = `<div class="centre"><div class="grand">Pas de vote</div><p class="info">Il n'y a que ta réponse cette fois.</p></div>`;
+      else if (s.vote != null) corps = `<div class="centre"><div class="grand">A voté ✓</div><div class="envoye">${esc(s.choix[s.vote]?.texte)}</div><p class="info">Regarde l'écran 👀</p></div>`;
+      else corps = `<div class="consigneJ">Vote pour la plus drôle</div><div class="choixJ">
+        ${s.choix.map(c => `<button data-i="${c.i}" ${c.moi ? 'disabled' : ''}>${esc(c.texte)}${c.moi ? '<small>ta réponse</small>' : ''}</button>`).join('')}</div>`;
+    }
+    else if (s.phase === 'final') {
+      corps = `<div class="centre"><div class="rond" style="background:${moi.couleur}"></div>
+        <div class="grand">${s.rang === 1 ? 'Victoire !' : s.rang + (s.rang === 1 ? 'er' : 'e') + ' place'}</div>
+        <p class="info">${s.score} points · ${s.nb} joueurs</p></div>`;
+    }
+    else {
+      corps = `<div class="centre"><div class="grand">Regarde l'écran 👀</div><p class="info">Ton score : ${s.score} pts</p></div>`;
+    }
+
+    app.innerHTML = `<div class="tel">${entete}${corps}</div>`;
+
+    const fRep = document.getElementById('fRep');
+    if (fRep) {
+      const t = document.getElementById('tRep'), cpt = document.getElementById('cpt');
+      t.oninput = () => cpt.textContent = `${t.value.length}/${LONGUEUR_MAX}`;
+      t.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fRep.requestSubmit(); } };
+      fRep.onsubmit = e => { e.preventDefault(); const v = t.value.trim(); if (v) envoyer({ t: 'rep', texte: v }); };
+      t.focus();
+    }
+    app.querySelectorAll('.choixJ button[data-i]').forEach(b => b.onclick = () => envoyer({ t: 'vote', i: +b.dataset.i }));
+  }
+
+  setInterval(() => {
+    const el = document.getElementById('chronoJ');
+    if (el) el.textContent = Math.max(0, Math.ceil((P.fin - Date.now()) / 1000));
+  }, 250);
+
+  if (P.code && P.nom) connecter(); else formulaire();
+}
+
+// ---------------------------------------------------------------------
+if (params.has('code')) joueur(params.get('code')); else accueil();
+</script>
+</body>
+</html>
