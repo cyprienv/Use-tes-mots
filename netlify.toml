@@ -1,0 +1,4 @@
+# Netlify (dépôt GitHub connecté) : génère la liste des médias à chaque mise en ligne.
+[build]
+  command = "sh lister-medias.sh"
+  publish = "."
