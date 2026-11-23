@@ -2,14 +2,19 @@
 //  USE TES MOTS : le contenu du jeu
 //  Modifie ce fichier pour ajouter tes phrases, photos et vidéos.
 //  - Phrases à trous : mets ___ (au moins 2 tirets bas) là où va la réponse.
-//  - Photos / vidéos : mets les fichiers dans le dossier "medias/"
-//    et ajoute leur chemin ci-dessous, ex. "medias/clip-plage.mp4".
-//    Vidéos conseillées : 5 à 15 secondes, en .mp4 (H.264).
+//  - Photos / vidéos : dépose-les simplement dans le dossier "medias/"
+//    (sous-dossiers acceptés). Le jeu les trouve tout seul, pas besoin
+//    de les lister ici. Vidéos conseillées : 5 à 15 s, en .mp4 (H.264).
 //  Tu peux aussi glisser des fichiers directement sur l'écran d'accueil
 //  du jeu, sans toucher à ce fichier (ils restent sur ton ordi).
 // =====================================================================
 
 window.CONTENU = {
+  // Seulement si le jeu est sur GitHub Pages AVEC un nom de domaine perso :
+  // indique le dépôt, ex. "cyprienvincent/use-tes-mots". Sinon, laisse vide.
+  github: "",
+
+  // (facultatif) médias en plus, hors du dossier medias/ ou sur un autre site
   videos: [
     // "medias/clip-01.mp4",
   ],

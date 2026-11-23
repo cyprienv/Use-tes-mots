@@ -61,8 +61,8 @@ input,textarea,select{font:inherit;color:inherit}
 .rejoindre .code{font-family:var(--display);font-size:clamp(80px,10vw,150px);line-height:1;letter-spacing:.08em;color:var(--jaune)}
 #qr{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--gris);font-size:14px;font-weight:600}
 #qr svg,#qr img{width:clamp(170px,15vw,240px);height:clamp(170px,15vw,240px);background:#fff;border-radius:14px;padding:8px;display:block}
-.liste-j{display:flex;flex-direction:column;gap:10px}
-.liste-j .pastille{font-size:20px;align-self:flex-start}
+.liste-j{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start}
+.liste-j .pastille{font-size:19px}
 .liste-j .pastille.nouveau{animation:pop .3s}
 .liste-j .vide{color:var(--gris)}
 .reglage{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600}
@@ -73,6 +73,7 @@ input,textarea,select{font:inherit;color:inherit}
 .compteurs{display:flex;gap:10px;flex-wrap:wrap}
 .compteurs span{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:14px}
 .compteurs b{color:var(--jaune)}
+.etat-medias{flex-basis:100%;color:var(--gris);font-size:13px}
 .avert{font-size:14px;color:var(--rouge)}
 
 /* ---------- hôte : partie ---------- */
@@ -117,6 +118,13 @@ input,textarea,select{font:inherit;color:inherit}
 .vote-grid .journal img{max-height:34vh}
 .vote-grid .carte-trou{font-size:clamp(22px,2.4vw,40px)}
 .liste-choix{list-style:none;display:flex;flex-direction:column;gap:12px}
+.liste-choix.serre{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.liste-choix.serre li{font-size:clamp(14px,1.2vw,20px);padding:10px 14px;gap:10px}
+.liste-choix li small{margin-left:auto;font-weight:600;font-size:.75em;white-space:nowrap}
+.pastille .virer{margin-left:2px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.08);font-size:13px;line-height:22px;opacity:.55}
+.pastille .virer:hover{opacity:1;background:var(--rouge);color:#fff}
+.pastilles .pastille .virer{display:none}
+.pastilles .pastille:hover .virer{display:inline-block}
 .liste-choix li{display:flex;gap:16px;align-items:center;background:var(--bg2);border-radius:16px;padding:16px 20px;font-weight:700;
   font-size:clamp(18px,1.8vw,30px);animation:monte .4s both}
 .liste-choix li b{font-family:var(--display);font-weight:400;color:var(--jaune);font-size:1.3em;min-width:1.2em}
@@ -129,6 +137,11 @@ input,textarea,select{font:inherit;color:inherit}
 .verdict .pts{font-family:var(--display);color:var(--jaune);margin-left:10px;font-size:1.3em}
 .verdict .zero{color:var(--gris);font-weight:600;font-size:clamp(18px,1.6vw,26px)}
 .suivant{position:fixed;right:24px;bottom:22px}
+.badge-code{position:fixed;top:clamp(14px,1.6vw,26px);left:50%;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:12px;
+  background:var(--bg2);border-radius:999px;padding:8px 18px;font-weight:600;color:var(--gris);font-size:clamp(14px,1.1vw,18px);white-space:nowrap}
+.badge-code b{font-family:var(--display);font-weight:400;color:var(--jaune);font-size:1.7em;letter-spacing:.12em;line-height:1}
+.son-btn{position:fixed;left:20px;bottom:18px;z-index:10;background:var(--bg2);border-radius:999px;width:46px;height:46px;font-size:20px;opacity:.7}
+.son-btn:hover{opacity:1}
 
 /* intro de manche */
 .intro{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
@@ -164,6 +177,7 @@ input,textarea,select{font:inherit;color:inherit}
 .tel .entete{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--gris);font-weight:600}
 .tel .entete .moi{display:flex;align-items:center;gap:8px;color:var(--ink)}
 .tel .entete .moi i{width:16px;height:16px;border-radius:50%}
+.tel .codeJ{font-family:var(--display);letter-spacing:.12em;color:var(--gris);font-size:18px}
 .tel .chronoJ{font-family:var(--display);color:var(--jaune);font-size:28px}
 .tel .grand{font-family:var(--display);font-weight:400;font-size:44px;line-height:1}
 .tel .consigneJ{font-weight:800;font-size:24px;line-height:1.25}
@@ -203,10 +217,10 @@ input,textarea,select{font:inherit;color:inherit}
 
 const app = document.getElementById('app');
 const PREFIXE = 'punchline-cv-';          // préfixe des identifiants réseau
-const MAX_JOUEURS = 6;
+const MAX_JOUEURS = 12;
 const LONGUEUR_MAX = 90;                  // caractères max par réponse
 const POINTS_VOTE = 100;
-const COULEURS = ['#FF4B3E','#FFD23F','#3EC1FF','#7CE38B','#C77DFF','#FF8FB1'];
+const COULEURS = ['#FF4B3E','#FFD23F','#3EC1FF','#7CE38B','#C77DFF','#FF8FB1','#FF9F1C','#2EC4B6','#C6F432','#B8B8FF','#E8E3D5','#C08552'];
 const MODES = {
   video: { nom:'Sous-titres',    consigne:'Écrivez le sous-titre de cette scène 🎬', aide:'Inventez la réplique de la scène.' },
   photo: { nom:'La Une',         consigne:'Trouvez le gros titre de cette une 📰',   aide:'Inventez le titre du journal pour cette photo.' },
@@ -215,11 +229,230 @@ const MODES = {
 const C = Object.assign({ videos:[], photos:[], phrases:[] }, window.CONTENU || {});
 const params = new URLSearchParams(location.search);
 
+// ---------------------------------------------------------------------
+//  Chargement automatique du dossier medias/
+//  1) medias/liste.json (généré par lister-medias.sh, ex. sur Netlify)
+//  2) sinon, sur GitHub Pages : on demande la liste des fichiers à GitHub
+// ---------------------------------------------------------------------
+const EXT_PHOTO = /\.(jpe?g|png|gif|webp|avif)$/i;
+const EXT_VIDEO = /\.(mp4|webm|mov|m4v)$/i;
+const encoderChemin = p => p.split('/').map(encodeURIComponent).join('/');
+
+function ajouterMedias(chemins) {
+  let n = 0;
+  chemins.forEach(p => {
+    const liste = EXT_VIDEO.test(p) ? C.videos : EXT_PHOTO.test(p) ? C.photos : null;
+    const src = encoderChemin(p);
+    if (liste && !liste.includes(src) && !liste.includes(p)) { liste.push(src); n++; }
+  });
+  return n;
+}
+
+function candidatsGitHub() {
+  // dépôt indiqué à la main dans contenu.js (utile avec un nom de domaine perso)
+  if (C.github) return [{ depot: C.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), sous: C.sousDossier || '' }];
+  if (!location.hostname.endsWith('.github.io')) return [];
+  const proprio = location.hostname.split('.')[0];
+  const segs = location.pathname.split('/').filter(Boolean);
+  if (segs.length && /\.html?$/i.test(segs[segs.length - 1])) segs.pop();
+  const c = [];
+  if (segs.length) c.push({ depot: `${proprio}/${segs[0]}`, sous: segs.slice(1).join('/') });   // site de projet
+  c.push({ depot: `${proprio}/${location.hostname}`, sous: segs.join('/') });                    // site perso
+  return c;
+}
+
+async function chargerMediasAuto() {
+  try {
+    const r = await fetch('medias/liste.json', { cache: 'no-store' });
+    if (r.ok) {
+      const j = await r.json();
+      return { source: 'liste', n: ajouterMedias([...(j.photos || []), ...(j.videos || [])]) };
+    }
+  } catch (_) {}
+  const candidats = candidatsGitHub();
+  let souci = candidats.length ? '' : 'hors-github';
+  for (const { depot, sous } of candidats) {
+    try {
+      const info = await fetch(`https://api.github.com/repos/${depot}`);
+      if (info.status === 403 || info.status === 429) { souci = 'limite'; break; }
+      if (!info.ok) { souci = souci || 'introuvable'; continue; }
+      const { default_branch } = await info.json();
+      const arbre = await (await fetch(`https://api.github.com/repos/${depot}/git/trees/${encodeURIComponent(default_branch)}?recursive=1`)).json();
+      const base = sous ? sous + '/' : '';
+      // fichiers du site (on retire le sous-dossier éventuel), sans les fichiers cachés
+      const fichiers = (arbre.tree || [])
+        .filter(t => t.type === 'blob' && t.path.startsWith(base) && !/(^|\/)\./.test(t.path.slice(base.length)))
+        .map(t => t.path.slice(base.length));
+      // dossier de médias : "medias" de préférence, sinon un nom proche (Medias, media, images, photos, videos…)
+      const DOSSIERS = /^(medias?|images?|img|photos?|videos?|vidéos?)\//i;
+      const chemins = fichiers.filter(p => DOSSIERS.test(p));
+      const heic = chemins.filter(p => /\.(heic|heif)$/i.test(p)).length;
+      const autres = fichiers.filter(p => !DOSSIERS.test(p) && (EXT_PHOTO.test(p) || EXT_VIDEO.test(p))).length;
+      return { source: 'github', n: ajouterMedias(chemins), heic, autres };
+    } catch (_) { souci = souci || 'reseau'; }
+  }
+  return { source: null, n: 0, souci };
+}
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const melange = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const auHasard = a => a[Math.random() * a.length | 0];
 const TROU = /_{2,}/;
 const reseauDispo = () => typeof Peer !== 'undefined';
+
+// =====================================================================
+//  SON : bandes-son générées en direct (Web Audio) + bruitages.
+//  Pour utiliser tes propres musiques, dépose dans le dossier "sons/" :
+//  lobby.mp3, ecrire.mp3, voter.mp3, revelation.mp3, scores.mp3, final.mp3
+//  (elles tournent en boucle et remplacent la musique générée).
+// =====================================================================
+const Son = (() => {
+  let ctx = null, master, busMusique, busSfx, bruit;
+  let style = null, prochainPas = 0, pas = 0, minuteur = null;
+  let audioPerso = null;
+  const fichiers = {};
+  const S = { coupe: localStorage.getItem('utm-son') === 'off' };
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+
+  // ---- les bandes-son (16 pas par mesure ; x = coup, . = silence) ----
+  const STYLES = {
+    lobby: { bpm: 96, swing: .14, vol: .5,
+      kick: 'x.....x...x.....', snare: '....x.......x...', hat: 'x.x.x.x.x.x.x.xo',
+      basse: 'x.....x.x.....x.', arp: 'x..x..x...x..x..', pad: true,
+      accords: [[53,57,60,64],[52,55,59,62],[50,53,57,60],[48,52,55,59]] },
+    ecrire: { bpm: 122, swing: 0, vol: .42,
+      kick: 'x...x...x...x...', snare: '....x.......x..x', hat: 'xxxxxxxxxxxxxxxx',
+      basse: 'x.xx.x.xx.xx.x.x', arp: 'xxxxxxxxxxxxxxxx', pad: false,
+      accords: [[57,60,64],[53,57,60],[50,53,57],[52,56,59]] },
+    voter: { bpm: 108, swing: .1, vol: .45,
+      kick: 'x..x..x...x..x..', snare: '....x.......x...', hat: 'x.x.x.x.x.x.x.x.',
+      basse: 'x..x..x...x..x..', arp: 'x.x.x.x.x.x.x.x.', pad: true,
+      accords: [[48,52,55,60],[43,47,50,55],[45,48,52,57],[41,45,48,53]] },
+    revelation: { bpm: 84, swing: .1, vol: .45,
+      kick: 'x.........x.....', snare: '................', hat: '..x...x...x...x.',
+      basse: 'x...............', arp: '................', pad: true,
+      accords: [[50,53,57,60],[46,50,53,57],[48,52,55,59],[45,48,52,55]] },
+    scores: { bpm: 124, swing: 0, vol: .45,
+      kick: 'x...x...x...x...', snare: '....x.......x...', hat: '..o...o...o...o.',
+      basse: 'x.x.x.x.x.x.x.x.', arp: 'x..x..x.x..x..x.', pad: true,
+      accords: [[48,52,55,60],[43,47,50,55],[45,48,52,57],[41,45,48,53]] },
+    final: { bpm: 128, swing: 0, vol: .45,
+      kick: 'x...x...x...x...', snare: '....x.......x.x.', hat: 'xoxoxoxoxoxoxoxo',
+      basse: 'x.x.x.x.x.x.x.x.', arp: 'xxxxxxxxxxxxxxxx', pad: true,
+      accords: [[48,52,55,60],[53,57,60,65],[43,47,50,55],[48,52,55,60]] },
+  };
+
+  function init() {
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = S.coupe ? 0 : .8;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp); comp.connect(ctx.destination);
+    busMusique = ctx.createGain(); busMusique.connect(master);
+    busSfx = ctx.createGain(); busSfx.gain.value = .9; busSfx.connect(master);
+    bruit = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = bruit.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // musiques perso éventuelles
+    Object.keys(STYLES).forEach(n => fetch(`sons/${n}.mp3`, { method: 'HEAD' }).then(r => { if (r.ok) fichiers[n] = `sons/${n}.mp3`; }).catch(() => {}));
+  }
+
+  // ---- instruments ----
+  function env(g, t, a, v, dec) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + dec); }
+  function osc(type, f, t, dur, v, dest, opts = {}) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (opts.vers) o.frequency.exponentialRampToValueAtTime(opts.vers, t + (opts.glisse || dur));
+    if (opts.detune) o.detune.value = opts.detune;
+    let sortie = g;
+    if (opts.filtre) { const fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(opts.filtre, t); fl.Q.value = opts.q || 1;
+      if (opts.filtreVers) fl.frequency.exponentialRampToValueAtTime(opts.filtreVers, t + dur); o.connect(fl); fl.connect(g); }
+    else o.connect(g);
+    env(g, t, opts.attaque || .005, v, dur);
+    sortie.connect(dest); o.start(t); o.stop(t + dur + .1);
+  }
+  function souffle(t, dur, v, type, f, dest, fVers) {
+    const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
+    s.buffer = bruit; fl.type = type; fl.frequency.setValueAtTime(f, t); if (fVers) fl.frequency.exponentialRampToValueAtTime(fVers, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(dest); env(g, t, .003, v, dur); s.start(t); s.stop(t + dur + .05);
+  }
+  const kick  = (t, d) => osc('sine', 150, t, .32, .9, d, { vers: 42, glisse: .14 });
+  const snare = (t, d) => { souffle(t, .16, .45, 'bandpass', 1900, d); osc('triangle', 190, t, .08, .3, d); };
+  const hat   = (t, d, ouvert) => souffle(t, ouvert ? .2 : .045, ouvert ? .16 : .12, 'highpass', 7500, d);
+  const basse = (t, m, d) => osc('sawtooth', hz(m), t, .22, .32, d, { filtre: 900, filtreVers: 180, q: 6 });
+  const pluck = (t, m, d, v = .11) => osc('square', hz(m), t, .16, v, d, { filtre: 3200, filtreVers: 500, q: 3 });
+  const pad   = (t, notes, dur, d) => notes.forEach((m, i) => { osc('triangle', hz(m), t, dur, .05, d, { attaque: .08, detune: i % 2 ? 6 : -6 }); });
+
+  // ---- séquenceur ----
+  function programmer() {
+    if (!style) return;
+    const st = STYLES[style], dPas = 60 / st.bpm / 4;
+    while (prochainPas < ctx.currentTime + .15) {
+      const i = pas % 16, mesure = Math.floor(pas / 16) % st.accords.length, acc = st.accords[mesure];
+      const t = prochainPas + (i % 2 ? st.swing * dPas : 0);
+      if (st.kick[i] === 'x') kick(t, busMusique);
+      if (st.snare[i] === 'x') snare(t, busMusique);
+      if (st.hat[i] !== '.') hat(t, busMusique, st.hat[i] === 'o');
+      if (st.basse[i] === 'x') basse(t, acc[0] - 12 + (style === 'ecrire' && i % 4 === 2 ? 12 : 0), busMusique);
+      if (st.arp[i] === 'x') pluck(t, acc[(pas >> 0) % acc.length] + 12, busMusique, style === 'ecrire' ? .07 : .1);
+      if (st.pad && i === 0) pad(t, acc, dPas * 15, busMusique);
+      prochainPas += dPas; pas++;
+    }
+  }
+
+  S.musique = nom => {
+    if (!ctx) return;
+    if (style === nom && (minuteur || audioPerso)) return;
+    S.stop();
+    style = nom;
+    if (!nom) return;
+    if (fichiers[nom]) {
+      audioPerso = new Audio(fichiers[nom]); audioPerso.loop = true; audioPerso.volume = S.coupe ? 0 : .7;
+      audioPerso.play().catch(() => {});
+      return;
+    }
+    busMusique.gain.cancelScheduledValues(ctx.currentTime);
+    busMusique.gain.setValueAtTime(0.0001, ctx.currentTime);
+    busMusique.gain.exponentialRampToValueAtTime(STYLES[nom].vol, ctx.currentTime + .6);
+    prochainPas = ctx.currentTime + .05; pas = 0;
+    minuteur = setInterval(programmer, 25);
+  };
+  S.stop = () => {
+    if (minuteur) { clearInterval(minuteur); minuteur = null; }
+    if (audioPerso) { audioPerso.pause(); audioPerso = null; }
+    style = null;
+  };
+
+  // ---- bruitages ----
+  const SFX = {
+    join:   t => { osc('sine', 500, t, .12, .5, busSfx, { vers: 1200, glisse: .08 }); osc('sine', 1200, t + .08, .1, .3, busSfx); },
+    envoye: t => { osc('square', hz(84), t, .07, .15, busSfx, { filtre: 4000 }); osc('square', hz(91), t + .07, .12, .15, busSfx, { filtre: 4000 }); },
+    vote:   t => { osc('triangle', hz(76), t, .09, .35, busSfx); osc('triangle', hz(83), t + .06, .12, .3, busSfx); },
+    tick:   t => osc('square', 1500, t, .03, .18, busSfx, { filtre: 3000 }),
+    tock:   t => osc('square', 1000, t, .03, .18, busSfx, { filtre: 2500 }),
+    buzzer: t => { osc('sawtooth', 110, t, .55, .3, busSfx, { filtre: 1200 }); osc('sawtooth', 116, t, .55, .3, busSfx, { filtre: 1200 }); },
+    intro:  t => { souffle(t, 1.1, .35, 'bandpass', 300, busSfx, 6000);
+                   const h = t + 1.1; kick(h, busSfx); souffle(h, .9, .35, 'highpass', 4000, busSfx);
+                   [60, 64, 67, 72].forEach(m => osc('sawtooth', hz(m), h, .6, .09, busSfx, { filtre: 3000, filtreVers: 600 })); },
+    whoosh: t => souffle(t, .45, .3, 'bandpass', 400, busSfx, 5000),
+    pop:    t => osc('sine', 700, t, .1, .45, busSfx, { vers: 1400, glisse: .05 }),
+    ding:   t => { [79, 84, 88].forEach((m, i) => osc('sine', hz(m), t + i * .07, .5, .28, busSfx)); },
+    bide:   t => { [67, 66, 65, 62].forEach((m, i) => osc('sawtooth', hz(m - 12), t + i * .28, i === 3 ? .7 : .25, .14, busSfx, { filtre: 1400 })); },
+    fanfare:t => { [[60,64,67],[60,64,67],[65,69,72],[67,71,74],[72,76,79]].forEach((acc, i) =>
+                   acc.forEach(m => osc('sawtooth', hz(m), t + [0,.15,.3,.45,.65][i], i === 4 ? 1.2 : .13, .07, busSfx, { filtre: 3500 }))); },
+  };
+  S.sfx = nom => { if (ctx && SFX[nom]) SFX[nom](ctx.currentTime + .01); };
+
+  S.basculer = () => {
+    S.coupe = !S.coupe;
+    localStorage.setItem('utm-son', S.coupe ? 'off' : 'on');
+    if (master) master.gain.setTargetAtTime(S.coupe ? 0 : .8, ctx.currentTime, .05);
+    if (audioPerso) audioPerso.volume = S.coupe ? 0 : .7;
+  };
+  S.init = init;
+  return S;
+})();
 
 // ---------------------------------------------------------------------
 //  Accueil
@@ -228,7 +461,7 @@ function accueil() {
   app.innerHTML = `
   <div class="accueil">
     <h1 class="logo">USE TES <span>MOTS</span></h1>
-    <p class="tag">Le jeu où la réplique la plus drôle l'emporte. De 2 à 6 joueurs.</p>
+    <p class="tag">Le jeu où la réplique la plus drôle l'emporte. De 2 à 12 joueurs.</p>
     <div class="choix">
       <button class="btn gros" id="bHote">Créer une partie<small>sur le grand écran</small></button>
       <button class="btn gros alt" id="bJoin">Rejoindre<small>depuis ton téléphone</small></button>
@@ -242,6 +475,7 @@ function accueil() {
 //  HÔTE (grand écran)
 // =====================================================================
 function hote() {
+  Son.init();
   const H = window.H = {
     code: null, peer: null, enLigne: false, erreur: null,
     joueurs: [],           // {id, nom, couleur, score, conn, connecte, token, bot}
@@ -289,9 +523,10 @@ function hote() {
         if (j.conn && j.conn !== conn) { try { j.conn.close(); } catch (_) {} }
         j.conn = conn; j.connecte = true; j.token = d.token;
       } else {
-        if (H.joueurs.length >= MAX_JOUEURS) return conn.send({ t: 'refus', msg: 'La partie est complète (6 joueurs max).' });
+        if (H.joueurs.length >= MAX_JOUEURS) return conn.send({ t: 'refus', msg: `La partie est complète (${MAX_JOUEURS} joueurs max).` });
         j = { id: 'j' + Math.random().toString(36).slice(2, 9), nom, couleur: couleurLibre(), score: 0, conn, connecte: true, token: d.token };
         H.joueurs.push(j);
+        Son.sfx('join');
       }
       conn.send({ t: 'ok', id: j.id, nom: j.nom, couleur: j.couleur });
       envoyer(j); live();
@@ -333,6 +568,7 @@ function hote() {
     texte = String(texte || '').trim().replace(/\s+/g, ' ').slice(0, LONGUEUR_MAX);
     if (!texte) return;
     H.reponses[j.id] = texte;
+    Son.sfx('envoye');
     envoyer(j); live(); verifierFin();
   }
   function voter(j, i) {
@@ -340,6 +576,7 @@ function hote() {
     const c = H.choix[i];
     if (!c || c.auteur === j.id) return;
     H.votes[j.id] = i;
+    Son.sfx('vote');
     envoyer(j); live(); verifierFin();
   }
   const peutVoter = j => H.choix.some(c => c.auteur !== j.id);
@@ -355,7 +592,14 @@ function hote() {
   }
 
   // ----- déroulé de la partie -----
-  function phase(p) { H.phase = p; H.etape++; render(); syncTous(); }
+  const MUSIQUE = { lobby: 'lobby', ecrire: 'ecrire', voter: 'voter', reveal: 'revelation', scores: 'scores', final: 'final' };
+  function phase(p) {
+    H.phase = p; H.etape++; render(); syncTous();
+    if (p === 'intro') { Son.stop(); Son.sfx('intro'); }
+    else if (p === 'rien') { Son.stop(); Son.sfx('bide'); }
+    else if (p === 'final') { Son.stop(); Son.sfx('fanfare'); plusTard(1900, () => Son.musique('final')); }
+    else Son.musique(MUSIQUE[p]);
+  }
   function plusTard(ms, fn) { const e = H.etape; setTimeout(() => { if (H.etape === e) fn(); }, ms); }
 
   function construireManches() {
@@ -419,7 +663,9 @@ function hote() {
       H.deltas[c.auteur] = (H.deltas[c.auteur] || 0) + pts;
     });
     // du moins voté au plus voté, pour garder le suspense
-    H.ordre = [...H.choix].sort((a, b) => a.votants.length - b.votants.length);
+    const sansVote = H.choix.filter(c => !c.votants.length);
+    const avecVotes = H.choix.filter(c => c.votants.length).sort((a, b) => a.votants.length - b.votants.length);
+    H.ordre = (sansVote.length >= 3 ? [{ groupe: sansVote, votants: [] }] : sansVote).concat(avecVotes);
     H.revealIdx = 0;
     phase('reveal');
     programmerReveal();
@@ -427,8 +673,12 @@ function hote() {
 
   function programmerReveal() {
     const m = H.manches[H.idx];
+    const c = H.ordre[H.revealIdx];
+    Son.sfx('whoosh');
+    c.votants.forEach((_, k) => plusTard(1200 + k * 130, () => Son.sfx('pop')));
+    plusTard(2200, () => Son.sfx(c.votants.length ? 'ding' : 'bide'));
     const e = H.etape;
-    if (m.mode === 'video') {
+    if (m.mode === 'video' && !c.groupe) {
       const v = app.querySelector('video');
       if (v) {
         v.onended = () => plusTard(1800, avancerReveal);
@@ -465,12 +715,18 @@ function hote() {
     const r = restant();
     const el = document.getElementById('chrono');
     if (el) { el.textContent = r; el.classList.toggle('urgent', r <= 10); }
+    if (r !== H.derniereSeconde) {
+      H.derniereSeconde = r;
+      if (r > 0 && r <= 10) Son.sfx(r % 2 ? 'tick' : 'tock');
+      if (r === 0) Son.sfx('buzzer');
+    }
     if (r <= 0) H.phase === 'ecrire' ? passerVote() : passerReveal();
   }, 250);
 
   document.addEventListener('keydown', e => {
     if (e.target.matches('input, textarea, select')) return;
     if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'Enter') { e.preventDefault(); suivant(); }
+    if (e.code === 'KeyM') { Son.basculer(); const b = document.getElementById('bSon'); if (b) b.textContent = Son.coupe ? '🔇' : '🔊'; }
   });
 
   // ----- médias glissés -----
@@ -492,7 +748,7 @@ function hote() {
 
   // ----- rendu -----
   const lienJoin = () => location.origin + location.pathname + '?code=' + H.code;
-  const pastille = (j, cls = '') => `<span class="pastille ${cls}"><i style="background:${j.couleur}"></i>${esc(j.nom)}</span>`;
+  const pastille = (j, cls = '', virable = false) => `<span class="pastille ${cls}"><i style="background:${j.couleur}"></i>${esc(j.nom)}${virable ? `<button class="virer" data-virer="${j.id}" title="Retirer ce joueur">✕</button>` : ''}</span>`;
 
   function scene(m, texte, opts = {}) {
     if (m.mode === 'video') {
@@ -595,13 +851,22 @@ function hote() {
       app.innerHTML = `<div class="jeu">${entete('<span class="chrono" id="chrono"></span>')}
         <div class="consigne">Votez pour la plus drôle sur vos téléphones</div>
         <div class="vote-grid"><div>${scene(m, null, { boucle: true })}</div>
-          <ol class="liste-choix">${H.choix.map((c, i) => `<li style="animation-delay:${i * .12}s"><b>${i + 1}</b>${esc(c.texte)}</li>`).join('')}</ol></div>
+          <ol class="liste-choix ${H.choix.length > 6 ? 'serre' : ''}">${H.choix.map((c, i) => `<li style="animation-delay:${i * .12}s"><b>${i + 1}</b>${esc(c.texte)}</li>`).join('')}</ol></div>
         <div class="pastilles" id="pastilles"></div></div>`;
     }
 
     else if (p === 'reveal') {
       const c = H.ordre[H.revealIdx];
-      const auteur = H.joueurs.find(j => j.id === c.auteur) || { nom: '?', couleur: '#888' };
+      const nomDe = id => H.joueurs.find(j => j.id === id) || { nom: '(parti)', couleur: '#888' };
+      if (c.groupe) {
+        app.innerHTML = `<div class="jeu">${entete(`<span class="manche">${H.revealIdx + 1}/${H.ordre.length}</span>`)}
+          <div class="consigne">Personne n'a voté pour… 😬</div>
+          <div class="scene-wrap"><ol class="liste-choix ${c.groupe.length > 6 ? 'serre' : ''}" style="width:min(100%,1100px)">${c.groupe.map((x, i) =>
+            `<li style="animation-delay:${i * .1}s">${esc(x.texte)}<small style="color:${nomDe(x.auteur).couleur}">${esc(nomDe(x.auteur).nom)}</small></li>`).join('')}</ol></div>
+          <button class="btn discret suivant" id="bSuiv">Suivant ▸</button></div>`;
+        document.getElementById('bSuiv').onclick = suivant;
+      } else {
+      const auteur = nomDe(c.auteur);
       const votants = c.votants.map(id => H.joueurs.find(j => j.id === id)).filter(Boolean);
       app.innerHTML = `<div class="jeu">${entete(`<span class="manche">${H.revealIdx + 1}/${H.ordre.length}</span>`)}
         <div class="scene-wrap">${scene(m, c.texte)}</div>
@@ -611,6 +876,7 @@ function hote() {
         </div>
         <button class="btn discret suivant" id="bSuiv">Suivant ▸</button></div>`;
       document.getElementById('bSuiv').onclick = suivant;
+      }
     }
 
     else if (p === 'scores') {
@@ -638,6 +904,11 @@ function hote() {
       document.getElementById('bRejouer').onclick = rejouer;
     }
 
+    if (p !== 'lobby') {
+      app.insertAdjacentHTML('beforeend', `<div class="badge-code">Code pour (re)joindre <b>${H.code}</b></div>`);
+    }
+    app.insertAdjacentHTML('beforeend', `<button class="son-btn" id="bSon" title="Son (touche M)">${Son.coupe ? '🔇' : '🔊'}</button>`);
+    document.getElementById('bSon').onclick = () => { Son.basculer(); document.getElementById('bSon').textContent = Son.coupe ? '🔇' : '🔊'; };
     live();
   }
 
@@ -647,14 +918,15 @@ function hote() {
       const liste = document.getElementById('listeJ');
       if (!liste) return;
       liste.innerHTML = H.joueurs.length
-        ? H.joueurs.map(j => { const n = !j.vu; j.vu = true; return pastille(j, (j.connecte ? '' : 'off') + (n ? ' nouveau' : '')); }).join('')
+        ? H.joueurs.map(j => { const n = !j.vu; j.vu = true; return pastille(j, (j.connecte ? '' : 'off') + (n ? ' nouveau' : ''), true); }).join('')
         : '<p class="vide">En attente des joueurs…</p>';
       document.getElementById('nbJ').textContent = `${H.joueurs.length}/${MAX_JOUEURS}`;
       document.getElementById('bBot').disabled = H.joueurs.length >= MAX_JOUEURS;
       const nV = C.videos.length + H.medias.filter(m => m.type === 'video').length;
       const nP = C.photos.length + H.medias.filter(m => m.type === 'photo').length;
       document.getElementById('compteurs').innerHTML =
-        `<span>🎬 Vidéos <b>${nV}</b></span><span>📰 Photos <b>${nP}</b></span><span>✍️ Phrases <b>${C.phrases.length}</b></span>`;
+        `<span>🎬 Vidéos <b>${nV}</b></span><span>📰 Photos <b>${nP}</b></span><span>✍️ Phrases <b>${C.phrases.length}</b></span>` +
+        (H.etatMedias ? `<small class="etat-medias">${esc(H.etatMedias)}</small>` : '');
       const b = document.getElementById('bLancer');
       b.disabled = H.joueurs.length < 2 || nV + nP + C.phrases.length === 0;
       b.innerHTML = H.joueurs.length < 2 ? 'Lancer la partie<small>il faut au moins 2 joueurs</small>' : 'Lancer la partie';
@@ -662,27 +934,58 @@ function hote() {
     const zone = document.getElementById('pastilles');
     if (zone) {
       zone.innerHTML = H.joueurs.map(j => {
-        if (!j.connecte) return pastille(j, 'off');
-        if (H.phase === 'ecrire') return pastille(j, H.reponses[j.id] ? 'fait' : 'attente');
-        if (H.phase === 'voter') return pastille(j, !peutVoter(j) || H.votes[j.id] != null ? 'fait' : 'attente');
-        return pastille(j);
+        if (!j.connecte) return pastille(j, 'off', true);
+        if (H.phase === 'ecrire') return pastille(j, H.reponses[j.id] ? 'fait' : 'attente', true);
+        if (H.phase === 'voter') return pastille(j, !peutVoter(j) || H.votes[j.id] != null ? 'fait' : 'attente', true);
+        return pastille(j, '', true);
       }).join('');
     }
   }
+
+  function exclure(id) {
+    const j = H.joueurs.find(x => x.id === id);
+    if (!j) return;
+    if (j.conn) { try { j.conn.send({ t: 'exclu' }); } catch (_) {} const c = j.conn; setTimeout(() => { try { c.close(); } catch (_) {} }, 300); }
+    H.joueurs = H.joueurs.filter(x => x !== j);
+    delete H.reponses[id]; delete H.votes[id];
+    live(); verifierFin();
+  }
+  app.addEventListener('click', e => {
+    const b = e.target.closest('[data-virer]');
+    if (b) { e.stopPropagation(); exclure(b.dataset.virer); }
+  });
 
   function ajouterBot() {
     if (H.joueurs.length >= MAX_JOUEURS) return;
     const pris = H.joueurs.map(j => j.nom);
     const nom = NOMS_BOT.find(n => !pris.includes(n)) || 'Bot ' + (H.joueurs.length + 1);
     H.joueurs.push({ id: 'b' + Math.random().toString(36).slice(2, 9), nom, couleur: couleurLibre(), score: 0, connecte: true, bot: true });
+    Son.sfx('join');
     live();
   }
 
   ouvrir();
   render();
+  Son.musique('lobby');
+  H.etatMedias = 'Recherche des médias…';
+  chargerMediasAuto().then(({ source, n, heic, autres, souci }) => {
+    const msgs = [];
+    if (source === 'liste') msgs.push(`Dossier medias/ : ${n} fichier(s) trouvé(s)`);
+    if (source === 'github') {
+      msgs.push(`Dossier medias/ (GitHub) : ${n} fichier(s) trouvé(s)`);
+      if (heic) msgs.push(`⚠️ ${heic} photo(s) en .HEIC ignorée(s) : convertis-les en .jpg`);
+      if (!n && autres) msgs.push(`⚠️ ${autres} image(s)/vidéo(s) trouvée(s) hors du dossier medias/ : déplace-les dedans`);
+      if (!n && !autres && !heic) msgs.push('⚠️ Aucun média dans le dossier medias/ du dépôt');
+    }
+    if (souci === 'introuvable') msgs.push('⚠️ Dépôt GitHub introuvable : il est peut-être en privé (passe-le en Public)');
+    if (souci === 'limite') msgs.push('⚠️ Trop de requêtes vers GitHub : réessaie dans quelques minutes');
+    if (souci === 'reseau') msgs.push('⚠️ Impossible de joindre GitHub pour lister les médias');
+    H.etatMedias = msgs.join(' · ');
+    live();
+  });
 }
 
-const NOMS_BOT = ['Bot Gégé', 'Bot Ginette', 'Bot Kévin', 'Bot Josiane', 'Bot Raymond', 'Bot Lola'];
+const NOMS_BOT = ['Bot Gégé', 'Bot Ginette', 'Bot Kévin', 'Bot Josiane', 'Bot Raymond', 'Bot Lola', 'Bot Jean-Mi', 'Bot Huguette', 'Bot Dylan', 'Bot Simone', 'Bot Brandon', 'Bot Mireille'];
 const REPLIQUES_BOT = [
   'Une raclette à 3h du matin', 'Mon ex', 'Le Wi-Fi de mamie', 'Un pigeon très motivé', 'Gérard de la compta',
   'Trois ratons laveurs dans un manteau', 'Une chaussette orpheline', 'Le bruit du micro-ondes', 'Un câlin non sollicité',
@@ -744,6 +1047,7 @@ function joueur(codeInit) {
       conn.on('data', d => {
         if (d.t === 'ok') { repondu = true; clearTimeout(delai); P.moi = d; }
         else if (d.t === 'refus') { repondu = true; clearTimeout(delai); formulaire(d.msg); peer.destroy(); }
+        else if (d.t === 'exclu') { P.moi = null; P.etat = null; formulaire('Tu as été retiré de la partie par l\'hôte.'); }
         else if (d.t === 'etat') { P.etat = d; render(); }
       });
       conn.on('close', () => { if (P.moi) { P.moi = null; message('Oups', 'La connexion avec l\'écran a été perdue.', 'Se reconnecter'); } });
@@ -763,9 +1067,11 @@ function joueur(codeInit) {
     const cle = [s.phase, s.etape, s.envoye ? 1 : 0, s.vote ?? '-'].join('|');
     if (cle === P.cle) return;
     P.cle = cle;
+    if ((s.phase === 'ecrire' && !s.envoye) || (s.phase === 'voter' && s.vote == null)) { try { navigator.vibrate && navigator.vibrate(120); } catch (_) {} }
     if (s.reste != null) P.fin = Date.now() + s.reste * 1000;
 
     const entete = `<div class="entete"><span class="moi"><i style="background:${moi.couleur}"></i>${esc(moi.nom)}</span>
+      <span class="codeJ">${esc(P.code)}</span>
       ${s.phase === 'ecrire' || s.phase === 'voter' ? '<span class="chronoJ" id="chronoJ"></span>' : `<span>${s.score} pts</span>`}</div>`;
     let corps = '';
 
