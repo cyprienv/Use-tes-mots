@@ -1,6 +1,6 @@
 # USE TES MOTS
 
-Jeu de répliques façon *Use Your Words* : un grand écran, de 2 à 12 joueurs sur téléphone, 3 modes de jeu (Sous-titres, La Une, Phrase à trous).
+Jeu de répliques façon *Use Your Words* : un grand écran, de 2 à 12 joueurs sur téléphone, 3 modes de jeu (Légende vidéo, La Une, Phrase à trous), plus une manche finale « The Final Countdown » (3 questions rapides, votes x2), activable dans les réglages. Ses questions se personnalisent dans `contenu.js` (liste `finale`).
 
 ## Fichiers
 - `index.html` : tout le jeu (écran hôte + téléphones).

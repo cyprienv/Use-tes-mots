@@ -19,6 +19,19 @@
 html,body{height:100%}
 body[data-mode="video"]{--accent:#3EC1FF;--bg:#08111F;--bg2:#13203A;--ligne:#22314F}
 body[data-mode="photo"]{--accent:#FF6A3D;--bg:#160C09;--bg2:#2A1711;--ligne:#3E241B}
+body[data-mode="finale"]{--accent:#E8457F;--bg:#FFD9E8;--bg2:#FFC4DB;--ligne:#F5A3C5;--ink:#3A0F24;--gris:#9C5578}
+body[data-mode="finale"] .carte-trou,body[data-mode="finale"] .phraseJ,body[data-mode="finale"] .pastille.fait{background:#fff;color:var(--ink)}
+body[data-mode="finale"] .carte-trou .trou{border-color:var(--ink)}
+body[data-mode="finale"] .btn:not(.discret){color:#fff}
+body[data-mode="finale"] .res-auteur,body[data-mode="finale"] .liste-choix li small{color:var(--ink)!important;text-shadow:none}
+body[data-mode="finale"] .res-auteur::before{content:'✍️ '}
+body[data-mode="finale"] .intro h1{font-size:clamp(60px,10vw,170px);text-shadow:0 6px 0 #fff}
+.carte-finale .q{font-size:.62em;color:var(--gris);margin-bottom:.4em}
+.carte-finale .rempli{display:inline-block}
+.tel .qJ{display:flex;flex-direction:column;gap:8px}
+.tel .qJ b{font-size:17px;line-height:1.3}
+.tel .qJ textarea{font-size:19px;padding:12px}
+.tel .questionJ{color:var(--gris);font-weight:700;font-size:17px;margin-top:-10px}
 body[data-mode="trou"]{--accent:#FFD23F;--bg:#13110A;--bg2:#252012;--ligne:#3A321C}
 body{transition:background-color .6s;background:var(--bg);color:var(--ink);font-family:var(--texte);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
@@ -94,6 +107,10 @@ input,textarea,select{font:inherit;color:inherit}
 /* scène : vidéo */
 .ecran-video{--r:1.7778;--hmax:calc(100vh - 300px);position:relative;width:min(100%, calc(var(--hmax) * var(--r)));aspect-ratio:var(--r);background:#000;border-radius:16px;overflow:hidden}
 .ecran-video video{width:100%;height:100%;object-fit:contain;display:block}
+.video-bloc{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%}
+.video-bloc:has(.legende-video) .ecran-video{--hmax:calc(100vh - 400px)}
+.legende-video{max-width:min(100%,1100px);background:var(--accent);color:#111;border-radius:14px;padding:.35em .8em;
+  font-weight:800;font-size:clamp(22px,2.6vw,44px);line-height:1.2;text-align:center;animation:monte .35s both}
 .soustitre{position:absolute;left:6%;right:6%;bottom:7%;text-align:center;font-weight:800;font-size:clamp(22px,2.8vw,48px);line-height:1.2;
   color:#fff;text-shadow:0 0 6px #000,0 2px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 -2px 0 #000}
 .soustitre span{background:rgba(0,0,0,.35);padding:.05em .3em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
@@ -143,6 +160,7 @@ input,textarea,select{font:inherit;color:inherit}
 .numero-rep{position:absolute;left:0;top:50%;transform:translateY(-50%);font-family:var(--display);font-size:clamp(90px,11vw,180px);color:var(--accent);line-height:1;animation:pop .4s both;z-index:2}
 .resultats-wrap{flex:1;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:3vw;align-items:center;min-height:0}
 .mini-scene .ecran-video{--hmax:40vh;width:100%}
+.vote-grid .video-bloc,.mini-scene .video-bloc{align-items:stretch}
 .mini-scene .journal{--hmax:30vh;width:100%}
 .mini-scene .journal .titre{font-size:clamp(20px,2vw,34px)}
 .mini-scene .carte-trou{font-size:clamp(20px,2vw,34px)}
@@ -247,11 +265,22 @@ const LONGUEUR_MAX = 90;                  // caractères max par réponse
 const POINTS_VOTE = 100;
 const COULEURS = ['#FF4B3E','#FFD23F','#3EC1FF','#7CE38B','#C77DFF','#FF8FB1','#FF9F1C','#2EC4B6','#C6F432','#B8B8FF','#E8E3D5','#C08552'];
 const MODES = {
-  video: { nom:'Sous-titres',    consigne:'Écrivez le sous-titre de cette scène 🎬', aide:'Inventez la réplique de la scène.' },
+  video: { nom:'Légende vidéo',  consigne:'Écrivez la légende de cette vidéo 🎬',   aide:'Décrivez ce qui se passe, le plus drôlement possible.' },
   photo: { nom:'La Une',         consigne:'Trouvez le gros titre de cette une 📰',   aide:'Inventez le titre du journal pour cette photo.' },
+  finale:{ nom:'The Final Countdown', consigne:'3 questions, 1 minute ⏱️', aide:'3 questions rapides · les votes comptent double !' },
   trou:  { nom:'Phrase à trous', consigne:'Complétez la phrase ✍️',                  aide:'Remplissez le trou avec le plus drôle possible.' },
 };
-const C = Object.assign({ videos:[], photos:[], phrases:[] }, window.CONTENU || {});
+const C = Object.assign({ videos:[], photos:[], phrases:[], finale:[], phrasesAdulte:[], finaleAdulte:[] }, window.CONTENU || {});
+const FINALE_DEFAUT = [
+  'Un mauvais nom pour un chien', 'Ce qu\'il ne faut jamais dire à un mariage', 'Le pire parfum de glace',
+  'Une excuse pour ne pas aller à la salle', 'Le pire métier du monde', 'Ce que ta grand-mère cherche sur Google',
+  'Un titre de film qui fait peur aux chats', 'Le pire endroit pour s\'endormir', 'Une phrase pour rompre par SMS',
+  'Le pire cadeau d\'anniversaire', 'Ce qu\'il y a dans la poche d\'un pirate', 'Le pire prénom pour un bébé',
+  'Un mot de passe vraiment nul', 'Ce que pense un poisson rouge', 'La pire garniture de pizza',
+  'Une raison de se faire virer d\'un McDo', 'Un slogan pour vendre du vent', 'Le nouveau sport olympique',
+  'Ce que les pigeons complotent', 'Le pire tatouage possible', 'Un nom de groupe de rock ridicule',
+  'Ce que dit ton frigo la nuit', 'Le pire conseil pour un entretien d\'embauche', 'Une nouvelle émoji indispensable',
+];
 const params = new URLSearchParams(location.search);
 
 // ---------------------------------------------------------------------
@@ -367,6 +396,10 @@ const Son = (() => {
       kick: 'x...x...x...x...', snare: '....x.......x...', hat: '..o...o...o...o.',
       basse: 'x.x.x.x.x.x.x.x.', arp: 'x..x..x.x..x..x.', pad: true,
       accords: [[48,52,55,60],[43,47,50,55],[45,48,52,57],[41,45,48,53]] },
+    finale: { bpm: 140, swing: 0, vol: .42,
+      kick: 'x...x...x...x...', snare: '....x.......x.xx', hat: 'xxxxxxxxxxxxxxxx',
+      basse: 'x.x.x.x.x.x.x.x.', arp: 'x.xxx.xxx.xxx.xx', pad: true,
+      accords: [[54,58,61],[54,58,61],[52,56,59],[49,53,56]] },
     final: { bpm: 128, swing: 0, vol: .45,
       kick: 'x...x...x...x...', snare: '....x.......x.x.', hat: 'xoxoxoxoxoxoxoxo',
       basse: 'x.x.x.x.x.x.x.x.', arp: 'xxxxxxxxxxxxxxxx', pad: true,
@@ -481,6 +514,14 @@ const Son = (() => {
     fanfare:t => { [[60,64,67],[60,64,67],[65,69,72],[67,71,74],[72,76,79]].forEach((acc, i) =>
                    acc.forEach(m => osc('sawtooth', hz(m), t + [0,.15,.3,.45,.65][i], i === 4 ? 1.2 : .13, .07, busSfx, { filtre: 3500 }))); },
   };
+  // joue un fichier son une fois (ex. jingle de la finale) ; rappelle fin() à la fin
+  S.fichier = (src, fin) => {
+    if (S.coupe) { fin && setTimeout(fin, 500); return; }
+    const a = new Audio(src); a.volume = 1;
+    let fait = false; const finir = () => { if (!fait) { fait = true; fin && fin(); } };
+    a.onended = finir; a.onerror = finir;
+    a.play().catch(finir);
+  };
   S.sfx = nom => { if (ctx && SFX[nom]) SFX[nom](ctx.currentTime + .01); };
 
   S.basculer = () => {
@@ -523,7 +564,8 @@ function hote() {
     manches: [], idx: -1,
     reponses: {}, votes: {}, choix: [], ordre: [], revealIdx: 0, deltas: {},
     fin: 0,
-    reglages: { manches: 6, tEcrire: 75, tVoter: 30 },
+    reglages: { manches: 6, tEcrire: 75, tVoter: 30, finale: true, adulte: false },
+    qIdx: 0,
     medias: [],            // fichiers glissés : {type:'photo'|'video', url, nom}
   };
 
@@ -582,6 +624,11 @@ function hote() {
     return COULEURS.find(c => !prises.includes(c)) || auHasard(COULEURS);
   }
 
+  const phrasesActives = () => H.reglages.adulte && C.phrasesAdulte.length ? C.phrasesAdulte : C.phrases;
+  const estFinale = () => H.manches[H.idx]?.mode === 'finale';
+  const mult = () => estFinale() ? 2 : 1;
+  const questionCourante = () => H.manches[H.idx]?.questions?.[H.qIdx] || '';
+  const reponseDe = id => { const r = H.reponses[id]; return Array.isArray(r) ? (r[H.qIdx] || '') : (r || ''); };
   const restant = () => Math.max(0, Math.ceil((H.fin - Date.now()) / 1000));
 
   function vue(j) {
@@ -589,7 +636,9 @@ function hote() {
     const v = { t: 'etat', phase: H.phase, manche: H.idx + 1, total: H.manches.length, score: j.score, etape: H.etape,
       mode: m && !['lobby', 'scores', 'final'].includes(H.phase) ? m.mode : '' };
     if (H.phase === 'intro') v.mode = m.mode;
-    if (H.phase === 'ecrire') Object.assign(v, { mode: m.mode, texte: m.mode === 'trou' ? m.texte : null, envoye: H.reponses[j.id] || null, reste: restant() });
+    if (H.phase === 'ecrire') Object.assign(v, { mode: m.mode, texte: m.mode === 'trou' ? m.texte : null, questions: m.questions || null,
+      envoye: H.reponses[j.id] ? [].concat(H.reponses[j.id]).filter(Boolean).join(' · ') : null, reste: restant() });
+    if (m && m.mode === 'finale' && H.phase !== 'ecrire') v.question = questionCourante();
     if (H.phase === 'voter') Object.assign(v, { choix: H.choix.map((c, i) => ({ i, texte: c.texte, moi: c.auteur === j.id })), vote: H.votes[j.id] ?? null, reste: restant() });
     if (H.phase === 'final') { const cl = classement(); v.rang = cl.findIndex(x => x.id === j.id) + 1; v.nb = cl.length; }
     return v;
@@ -605,7 +654,12 @@ function hote() {
   // ----- actions des joueurs -----
   function soumettre(j, texte) {
     if (H.phase !== 'ecrire' || H.reponses[j.id]) return;
-    texte = String(texte || '').trim().replace(/\s+/g, ' ').slice(0, LONGUEUR_MAX);
+    const net = t => String(t || '').trim().replace(/\s+/g, ' ').slice(0, LONGUEUR_MAX);
+    if (estFinale()) {
+      texte = (Array.isArray(texte) ? texte : [texte]).slice(0, 3).map(net);
+      while (texte.length < 3) texte.push('');
+      if (!texte.some(Boolean)) return;
+    } else texte = net(texte);
     if (!texte) return;
     H.reponses[j.id] = texte;
     Son.sfx('envoye');
@@ -635,10 +689,11 @@ function hote() {
   const MUSIQUE = { lobby: 'lobby', ecrire: 'ecrire', regarder: 'revelation', voter: 'voter', reveal: 'revelation', scores: 'scores', final: 'final' };
   function phase(p) {
     H.phase = p; H.etape++; render(); syncTous();
-    if (p === 'intro') { Son.stop(); Son.sfx('intro'); }
+    if (p === 'intro' && estFinale()) { Son.stop(); Son.fichier('sons/the_final.mp3'); }
+    else if (p === 'intro') { Son.stop(); Son.sfx('intro'); }
     else if (p === 'rien') { Son.stop(); Son.sfx('bide'); }
     else if (p === 'final') { Son.stop(); Son.sfx('fanfare'); plusTard(1900, () => Son.musique('final')); }
-    else Son.musique(MUSIQUE[p]);
+    else Son.musique(estFinale() && p !== 'scores' ? 'finale' : MUSIQUE[p]);
   }
   function plusTard(ms, fn) { const e = H.etape; setTimeout(() => { if (H.etape === e) fn(); }, ms); }
 
@@ -646,7 +701,7 @@ function hote() {
     const pools = {
       video: melange([...C.videos, ...H.medias.filter(m => m.type === 'video').map(m => m.url)]).map(src => ({ mode: 'video', src })),
       photo: melange([...C.photos, ...H.medias.filter(m => m.type === 'photo').map(m => m.url)]).map(src => ({ mode: 'photo', src })),
-      trou:  melange(C.phrases).map(texte => ({ mode: 'trou', texte })),
+      trou:  melange(phrasesActives()).map(texte => ({ mode: 'trou', texte })),
     };
     const modes = melange(Object.keys(pools).filter(k => pools[k].length));
     const out = [];
@@ -654,6 +709,10 @@ function hote() {
     while (out.length < H.reglages.manches && modes.some(m => pools[m].length)) {
       const m = modes[k++ % modes.length];
       if (pools[m].length) out.push(pools[m].shift());
+    }
+    if (H.reglages.finale) {
+      const pool = H.reglages.adulte && C.finaleAdulte.length >= 3 ? C.finaleAdulte : C.finale.length >= 3 ? C.finale : FINALE_DEFAUT;
+      out.push({ mode: 'finale', questions: melange(pool).slice(0, 3) });
     }
     return out;
   }
@@ -670,22 +729,23 @@ function hote() {
     H.idx++;
     if (H.idx >= H.manches.length) return phase('final');
     phase('intro');
-    plusTard(3200, debutEcrire);
+    plusTard(estFinale() ? 5000 : 3200, debutEcrire);
   }
 
   function debutEcrire() {
-    H.reponses = {}; H.votes = {}; H.choix = [];
-    H.fin = Date.now() + H.reglages.tEcrire * 1000;
+    H.reponses = {}; H.votes = {}; H.choix = []; H.qIdx = 0;
+    H.fin = Date.now() + (estFinale() ? 60 : H.reglages.tEcrire) * 1000;
     phase('ecrire');
     const v = app.querySelector('video');
     if (v) jouerAvecSon(v, () => { v.muted = true; v.loop = true; v.play().catch(() => {}); });
-    H.joueurs.filter(j => j.bot).forEach(b => plusTard(1500 + Math.random() * 6000, () => soumettre(b, auHasard(REPLIQUES_BOT))));
+    H.joueurs.filter(j => j.bot).forEach(b => plusTard(1500 + Math.random() * 6000, () =>
+      soumettre(b, estFinale() ? [auHasard(REPLIQUES_BOT), auHasard(REPLIQUES_BOT), auHasard(REPLIQUES_BOT)] : auHasard(REPLIQUES_BOT))));
   }
 
   // on découvre chaque réponse sur le média, avant de voter
   function passerRegarder() {
-    H.choix = melange(Object.entries(H.reponses).map(([auteur, texte]) => ({ auteur, texte })));
-    if (H.choix.length < 2) { phase('rien'); plusTard(3500, mancheSuivante); return; }
+    H.choix = melange(Object.keys(H.reponses).map(auteur => ({ auteur, texte: reponseDe(auteur) })).filter(c => c.texte));
+    if (H.choix.length < 2) { phase('rien'); plusTard(3500, questionSuivante); return; }
     H.regardeIdx = 0;
     phase('regarder');
     programmerRegarder();
@@ -698,7 +758,7 @@ function hote() {
       jouerAvecSon(v, () => plusTard(900, avancerRegarder), false);   // la musique reste coupée jusqu'au vote
       plusTard(30000, avancerRegarder);          // sécurité si la vidéo est très longue
     } else {
-      plusTard(4500, avancerRegarder);
+      plusTard(estFinale() ? 3000 : 4500, avancerRegarder);
     }
   }
   function avancerRegarder() {
@@ -722,7 +782,7 @@ function hote() {
 
   function passerVote() {
     H.votes = {};
-    H.fin = Date.now() + H.reglages.tVoter * 1000;
+    H.fin = Date.now() + (estFinale() ? 20 : H.reglages.tVoter) * 1000;
     phase('voter');
     H.joueurs.filter(j => j.bot).forEach(b => plusTard(1500 + Math.random() * 5000, () => {
       const possibles = H.choix.map((c, i) => i).filter(i => H.choix[i].auteur !== b.id);
@@ -732,10 +792,10 @@ function hote() {
   }
 
   function passerReveal() {
-    H.deltas = {};
+    if (!estFinale() || H.qIdx === 0) H.deltas = {};
     H.choix.forEach((c, i) => {
       c.votants = Object.keys(H.votes).filter(id => H.votes[id] === i);
-      const pts = c.votants.length * POINTS_VOTE;
+      const pts = c.votants.length * POINTS_VOTE * mult();
       const auteur = H.joueurs.find(j => j.id === c.auteur);
       if (auteur) auteur.score += pts;
       H.deltas[c.auteur] = (H.deltas[c.auteur] || 0) + pts;
@@ -750,7 +810,7 @@ function hote() {
   function avancerReveal() {
     if (H.phase !== 'reveal') return;
     H.revealIdx++;
-    if (H.revealIdx >= H.ordre.length) { phase('scores'); plusTard(7000, mancheSuivante); return; }
+    if (H.revealIdx >= H.ordre.length) return questionSuivante();
     const c = H.ordre[H.revealIdx];
     const li = app.querySelector(`[data-res="${H.revealIdx}"]`);
     if (li) { li.classList.add('vu'); li.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
@@ -758,6 +818,12 @@ function hote() {
     c.votants.forEach((_, k) => setTimeout(() => Son.sfx('pop'), 250 + k * 120));
     setTimeout(() => Son.sfx(!c.votants.length ? 'bide' : dernier ? 'fanfare' : 'ding'), 300 + c.votants.length * 120);
     plusTard(dernier ? 4500 : c.votants.length ? 2200 : 1300, avancerReveal);
+  }
+
+  // finale : on enchaîne les 3 questions avant le classement
+  function questionSuivante() {
+    if (estFinale() && H.qIdx < 2) { H.qIdx++; return passerRegarder(); }
+    phase('scores'); plusTard(7000, mancheSuivante);
   }
 
   function suivant() {
@@ -816,15 +882,19 @@ function hote() {
 
   function scene(m, texte, opts = {}) {
     if (m.mode === 'video') {
-      return `<div class="ecran-video" ${RATIOS[m.src] ? `style="--r:${RATIOS[m.src]}"` : ''}><video src="${esc(m.src)}" playsinline ${opts.boucle ? 'muted autoplay loop' : ''}
+      return `<div class="video-bloc"><div class="ecran-video" ${RATIOS[m.src] ? `style="--r:${RATIOS[m.src]}"` : ''}><video src="${esc(m.src)}" playsinline ${opts.boucle ? 'muted autoplay loop' : ''}
         onloadedmetadata="noterRatio(this, this.videoWidth, this.videoHeight)"></video>
-        ${texte ? `<div class="soustitre"><span>${esc(texte)}</span></div>` : ''}</div>`;
+        </div>${texte ? `<div class="legende-video">${esc(texte)}</div>` : ''}</div>`;
     }
     if (m.mode === 'photo') {
       const date = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       return `<div class="journal" ${RATIOS[m.src] ? `style="--r:${RATIOS[m.src]}"` : ''}><div class="mast"><span>Le Quotidien des Mots</span><small>${date} · Édition spéciale</small></div>
         <h2 class="titre">${texte ? esc(texte) : '<span class="mystere">??? ??? ???</span>'}</h2>
         <img src="${esc(m.src)}" alt="" onload="noterRatio(this, this.naturalWidth, this.naturalHeight)"></div>`;
+    }
+    if (m.mode === 'finale') {
+      if (opts.toutes) return `<div class="carte-trou carte-finale">${m.questions.map((q, i) => `<div style="margin:.25em 0"><b style="color:var(--accent)">${i + 1}.</b> ${esc(q)}</div>`).join('')}</div>`;
+      return `<div class="carte-trou carte-finale"><div class="q">${esc(questionCourante())}</div>${texte ? `<span class="rempli">${esc(texte)}</span>` : '<span class="trou">____</span>'}</div>`;
     }
     const morceaux = TROU.test(m.texte) ? m.texte.split(TROU) : [m.texte + ' ', ''];
     const trou = texte ? `<span class="rempli">${esc(texte)}</span>` : `<span class="trou">____</span>`;
@@ -833,7 +903,10 @@ function hote() {
 
   function entete(droite = '') {
     const m = H.manches[H.idx];
-    return `<div class="haut"><span class="manche">Manche <b>${H.idx + 1}/${H.manches.length}</b> · ${MODES[m.mode].nom}</span>${droite}</div>`;
+    const titre = m.mode === 'finale'
+      ? `<b>Finale</b> · ${['ecrire'].includes(H.phase) ? '3 questions' : `Question ${H.qIdx + 1}/3`} · votes x2`
+      : `Manche <b>${H.idx + 1}/${H.manches.length}</b> · ${MODES[m.mode].nom}`;
+    return `<div class="haut"><span class="manche">${titre}</span>${droite}</div>`;
   }
 
   function render() {
@@ -872,6 +945,10 @@ function hote() {
               <select id="sEcrire">${[45,60,75,90,120].map(n => `<option value="${n}" ${n === H.reglages.tEcrire ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
             <div class="reglage">Temps pour voter
               <select id="sVoter">${[20,30,45].map(n => `<option value="${n}" ${n === H.reglages.tVoter ? 'selected' : ''}>${n} s</option>`).join('')}</select></div>
+            <div class="reglage">Manche finale « The Final Countdown »
+              <input type="checkbox" id="cFinale" ${H.reglages.finale ? 'checked' : ''} style="width:22px;height:22px;accent-color:#E8457F"></div>
+            <div class="reglage">Mode adulte 🔞 (questions coquines)
+              <input type="checkbox" id="cAdulte" ${H.reglages.adulte ? 'checked' : ''} style="width:22px;height:22px;accent-color:#FF4B3E"></div>
             <div class="depot" id="depot">Glisse tes photos et vidéos ici<br>ou <label>choisis des fichiers<input type="file" id="iFichiers" accept="image/*,video/*" multiple hidden></label></div>
             <div class="compteurs" id="compteurs"></div>
             <button class="btn gros" id="bLancer" style="margin-top:auto">Lancer la partie</button>
@@ -895,17 +972,19 @@ function hote() {
       document.getElementById('sManches').onchange = e => H.reglages.manches = +e.target.value;
       document.getElementById('sEcrire').onchange = e => H.reglages.tEcrire = +e.target.value;
       document.getElementById('sVoter').onchange = e => H.reglages.tVoter = +e.target.value;
+      document.getElementById('cFinale').onchange = e => H.reglages.finale = e.target.checked;
+      document.getElementById('cAdulte').onchange = e => { H.reglages.adulte = e.target.checked; live(); };
     }
 
     else if (p === 'intro') {
-      app.innerHTML = `<div class="intro"><div class="num">Manche ${H.idx + 1} sur ${H.manches.length}</div>
+      app.innerHTML = `<div class="intro"><div class="num">${m.mode === 'finale' ? 'Manche finale' : `Manche ${H.idx + 1} sur ${H.manches.length}`}</div>
         <h1>${MODES[m.mode].nom}</h1><p>${MODES[m.mode].aide}</p></div>`;
     }
 
     else if (p === 'ecrire') {
       app.innerHTML = `<div class="jeu">${entete('<span class="chrono" id="chrono"></span>')}
         <div class="consigne">${MODES[m.mode].consigne}</div>
-        <div class="scene-wrap">${scene(m, null, { boucle: true })}</div>
+        <div class="scene-wrap">${scene(m, null, { boucle: true, toutes: true })}</div>
         <div class="pastilles" id="pastilles"></div></div>`;
     }
 
@@ -943,7 +1022,7 @@ function hote() {
               <div class="res-info">
                 <span class="res-votes">${votants.length ? votants.map(j => `<i title="${esc(j.nom)}" style="background:${j.couleur}"></i>`).join('') : '<em>aucun vote</em>'}</span>
                 <span class="res-auteur" style="color:${auteur.couleur}">${esc(auteur.nom)}</span>
-                <span class="pts">+${votants.length * POINTS_VOTE}</span>
+                <span class="pts">+${votants.length * POINTS_VOTE * mult()}</span>
               </div></li>`; }).join('')}</ol>
         </div>
         <button class="btn discret suivant" id="bSuiv">Suivant ▸</button></div>`;
@@ -996,10 +1075,10 @@ function hote() {
       const nV = C.videos.length + H.medias.filter(m => m.type === 'video').length;
       const nP = C.photos.length + H.medias.filter(m => m.type === 'photo').length;
       document.getElementById('compteurs').innerHTML =
-        `<span>🎬 Vidéos <b>${nV}</b></span><span>📰 Photos <b>${nP}</b></span><span>✍️ Phrases <b>${C.phrases.length}</b></span>` +
+        `<span>🎬 Vidéos <b>${nV}</b></span><span>📰 Photos <b>${nP}</b></span><span>✍️ Phrases <b>${phrasesActives().length}</b>${H.reglages.adulte ? ' 🔞' : ''}</span>` +
         (H.etatMedias ? `<small class="etat-medias">${esc(H.etatMedias)}</small>` : '');
       const b = document.getElementById('bLancer');
-      b.disabled = H.joueurs.length < 2 || nV + nP + C.phrases.length === 0;
+      b.disabled = H.joueurs.length < 2 || nV + nP + phrasesActives().length === 0;
       b.innerHTML = H.joueurs.length < 2 ? 'Lancer la partie<small>il faut au moins 2 joueurs</small>' : 'Lancer la partie';
     }
     const zone = document.getElementById('pastilles');
@@ -1135,7 +1214,7 @@ function joueur(codeInit) {
     const s = P.etat, moi = P.moi;
     if (!s || !moi) return;
     // on ne redessine que si l'écran change vraiment (pour ne pas effacer ce qu'on tape)
-    const cle = [s.phase, s.etape, s.envoye ? 1 : 0, s.vote ?? '-'].join('|');
+    const cle = [s.phase, s.etape, s.envoye ? 1 : 0, s.vote ?? '-', s.question || ''].join('|');
     if (cle === P.cle) return;
     P.cle = cle;
     document.body.dataset.mode = s.mode || '';
@@ -1157,6 +1236,13 @@ function joueur(codeInit) {
     else if (s.phase === 'ecrire' && s.envoye) {
       corps = `<div class="centre"><div class="grand">Envoyé ✓</div><div class="envoye">${esc(s.envoye)}</div><p class="info">On attend les autres…</p></div>`;
     }
+    else if (s.phase === 'ecrire' && s.questions) {
+      corps = `<div class="consigneJ">${MODES.finale.consigne}</div>
+        <form id="fRepF" style="display:flex;flex-direction:column;gap:18px">
+          ${s.questions.map((q, i) => `<label class="qJ"><b>${i + 1}. ${esc(q)}</b>
+            <textarea rows="2" maxlength="${LONGUEUR_MAX}" data-q="${i}" placeholder="Ta réponse…"></textarea></label>`).join('')}
+          <button class="btn">Envoyer les 3 réponses</button></form>`;
+    }
     else if (s.phase === 'ecrire') {
       const morceaux = s.texte ? (TROU.test(s.texte) ? s.texte.split(TROU) : [s.texte + ' ', '']) : null;
       corps = `<div class="consigneJ">${MODES[s.mode].consigne}</div>
@@ -1170,7 +1256,7 @@ function joueur(codeInit) {
       const votables = s.choix.filter(c => !c.moi);
       if (!votables.length) corps = `<div class="centre"><div class="grand">Pas de vote</div><p class="info">Il n'y a que ta réponse cette fois.</p></div>`;
       else if (s.vote != null) corps = `<div class="centre"><div class="grand">A voté ✓</div><div class="envoye">${esc(s.choix[s.vote]?.texte)}</div><p class="info">Regarde l'écran 👀</p></div>`;
-      else corps = `<div class="consigneJ">Vote pour la plus drôle</div><div class="choixJ">
+      else corps = `<div class="consigneJ">Vote pour la plus drôle</div>${s.question ? `<p class="questionJ">${esc(s.question)}</p>` : ''}<div class="choixJ">
         ${s.choix.map(c => `<button data-i="${c.i}" ${c.moi ? 'disabled' : ''}>${esc(c.texte)}${c.moi ? '<small>ta réponse</small>' : ''}</button>`).join('')}</div>`;
     }
     else if (s.phase === 'regarder') {
@@ -1187,6 +1273,16 @@ function joueur(codeInit) {
 
     app.innerHTML = `<div class="tel">${entete}${corps}</div>`;
 
+    const fRepF = document.getElementById('fRepF');
+    if (fRepF) {
+      const champs = [...fRepF.querySelectorAll('textarea')];
+      champs[0].focus();
+      fRepF.onsubmit = e => {
+        e.preventDefault();
+        const vals = champs.map(t => t.value.trim());
+        if (vals.some(Boolean)) envoyer({ t: 'rep', texte: vals });
+      };
+    }
     const fRep = document.getElementById('fRep');
     if (fRep) {
       const t = document.getElementById('tRep'), cpt = document.getElementById('cpt');
